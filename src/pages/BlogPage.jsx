@@ -416,14 +416,7 @@ const BlogPage = () => {
             <Col xs={24} lg={6}>
               <div style={{ position: 'sticky', top: '50px' }}>
                 <Space direction="vertical" size="large" style={{ width: '100%' }}>
-                  <Card size="small" title="Mục lục" bordered={false}>
-                    <Anchor>
-                      <Link href="#section1" title="Giới thiệu" />
-                      <Link href="#section2" title="Nội dung chính" />
-                      <Link href="#section3" title="Hướng dẫn" />
-                      <Link href="#section4" title="Kết luận" />
-                    </Anchor>
-                  </Card>
+               
 
                   <Button 
                     type="primary" 
