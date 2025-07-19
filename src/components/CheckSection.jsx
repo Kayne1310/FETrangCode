@@ -152,7 +152,7 @@ const CheckSection = () => {
                              <div className="analysis-info">
                  <Space direction="vertical" size="small">
                    <div>
-                     <strong>Phương pháp:</strong> Mô hình học máy phân loại dựa trên dữ liệu
+                     <strong>Phương pháp:</strong> Mô hình học máy phân loại dựa trên dữ liệu (Powered by Watchers Guard)
                    </div>
                    <div>
                      <strong>Thời gian xử lý:</strong> {result.processing_time}ms

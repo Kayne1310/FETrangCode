@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './IntroductionPage.css';
 
 const IntroductionPage = () => {
@@ -22,6 +22,10 @@ const IntroductionPage = () => {
             avatar: "👨‍🔬"
         }
     ];
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     return (
         <div className="introduction-container">

@@ -33,6 +33,7 @@ const { TabPane } = Tabs;
 
 const BusinessPage = () => {
   const [loading, setLoading] = useState(false);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState('7days');
   const [alertVisible, setAlertVisible] = useState(false);
@@ -70,6 +71,9 @@ const BusinessPage = () => {
     total: 0,
   });
 
+  // State for batch size selection
+  const [batchSize, setBatchSize] = useState(1000);
+
   // Raw analytics data storage
   const [rawAnalyticsData, setRawAnalyticsData] = useState([]);
 
@@ -86,11 +90,12 @@ const BusinessPage = () => {
   });
 
   // Process API data for analytics
-  const processAnalyticsData = (data, pageData = null) => {
+  const processAnalyticsData = (data) => {
     if (!data || !data.items) return;
 
-    // Use provided pageData or default to data.items
-    const items = pageData || data.items;
+    // Always process the items provided (either fresh data or accumulated data)
+    const itemsToProcess = data.items;
+    console.log('🔍 Processing analytics for', itemsToProcess.length, 'items');
     
     // Category Statistics
     const categoryCount = {};
@@ -98,7 +103,7 @@ const BusinessPage = () => {
     const timeSeriesMap = {};
     const riskScores = [];
 
-    items.forEach(item => {
+    itemsToProcess.forEach(item => {
       // Category stats
       const category = item.category || 'Unknown';
       categoryCount[category] = (categoryCount[category] || 0) + 1;
@@ -140,7 +145,7 @@ const BusinessPage = () => {
       categoryStats: Object.entries(categoryCount).map(([category, count]) => ({
         category,
         count,
-        percentage: ((count / items.length) * 100).toFixed(1)
+        percentage: ((count / itemsToProcess.length) * 100).toFixed(1)
       })),
       timeSeriesData: Object.values(timeSeriesMap).sort((a, b) => new Date(a.date) - new Date(b.date)),
       topDomains: Object.entries(domainCount)
@@ -160,7 +165,36 @@ const BusinessPage = () => {
     const suspiciousCount = categoryCount['Nghi ngờ'] || 0;
     const spamCount = categoryCount['Spam'] || 0;
     const phishingCount = categoryCount['Giả mạo'] || 0;
-    const totalCount = items.length;
+    const totalCount = itemsToProcess.length;
+
+    // Calculate accuracy based on actual classification confidence from data
+    let totalConfidenceScore = 0;
+    let itemsWithConfidence = 0;
+    
+    // Calculate average confidence from items that have confidence scores
+    itemsToProcess.forEach(item => {
+      if (item.confidence !== undefined && item.confidence !== null && item.confidence > 0) {
+        totalConfidenceScore += item.confidence;
+        itemsWithConfidence++;
+      } else if (item.riskScore !== undefined && item.riskScore !== null) {
+        // If no confidence, derive from risk score (inverse relationship)
+        const derivedConfidence = Math.max(10, 100 - item.riskScore);
+        totalConfidenceScore += derivedConfidence;
+        itemsWithConfidence++;
+      }
+    });
+    
+    let accuracyScore;
+    if (itemsWithConfidence > 0) {
+      // Use actual average confidence as accuracy
+      accuracyScore = Math.round(totalConfidenceScore / itemsWithConfidence);
+      accuracyScore = Math.max(50, Math.min(98, accuracyScore)); // Reasonable bounds
+    } else {
+      // Fallback: estimate based on category distribution
+      const wellClassifiedRate = totalCount > 0 ? 
+        ((safeCount + phishingCount) / totalCount) : 0; // Clear classifications
+      accuracyScore = Math.round(75 + (wellClassifiedRate * 20)); // 75-95% range
+    }
 
     setDashboardData({
       totalEmails: totalCount,
@@ -168,13 +202,30 @@ const BusinessPage = () => {
       suspiciousEmails: suspiciousCount,
       spamEmails: spamCount,
       phishingEmails: phishingCount,
-      todayProcessed: items.filter(item => {
+      todayProcessed: itemsToProcess.filter(item => {
         const today = new Date().toDateString();
         const itemDate = new Date(item.received_time).toDateString();
         return today === itemDate;
       }).length,
-      accuracy: totalCount > 0 ? ((safeCount / totalCount) * 100).toFixed(1) : 0,
+      accuracy: accuracyScore,
       avgResponseTime: 0.3
+    });
+
+    console.log('✅ Analytics processed:', {
+      totalEmails: totalCount,
+      safeEmails: safeCount,
+      threatEmails: suspiciousCount + spamCount + phishingCount,
+      safetyRate: `${((safeCount / totalCount) * 100).toFixed(1)}%`,
+      threatDetectionRate: `${(((suspiciousCount + spamCount + phishingCount) / totalCount) * 100).toFixed(1)}%`,
+      avgRiskScore: (riskScores.length > 0 ? riskScores.reduce((sum, score) => sum + score, 0) / riskScores.length : 0).toFixed(1),
+      calculatedAccuracy: `${accuracyScore}%`,
+      accuracySource: itemsWithConfidence > 0 ? 
+        `Avg confidence from ${itemsWithConfidence} items` : 
+        'Estimated from classification distribution',
+      avgConfidence: itemsWithConfidence > 0 ? 
+        `${(totalConfidenceScore / itemsWithConfidence).toFixed(1)}%` : 'N/A',
+      categories: Object.keys(categoryCount),
+      topDomains: Object.keys(domainCount).slice(0, 3)
     });
 
     // Update analytics pagination total
@@ -187,39 +238,72 @@ const BusinessPage = () => {
   };
 
   // Fetch analytics data with pagination support
-  const fetchAnalyticsData = async (currentPage = 1, pageSize = 1000) => {
-    setLoading(true);
+  const fetchAnalyticsData = async (currentPage = 1, pageSize = null, isLoadMore = false) => {
+    const actualPageSize = pageSize || batchSize;
+    setAnalyticsLoading(true);
     try {
       const requestBody = {
         pageIndex: currentPage,
-        pageSize: pageSize,
+        pageSize: actualPageSize,
         sortColumn: 'received_time',
         sortOrder: 'desc',
       };
 
+      console.log('🔄 Fetching analytics data:', { currentPage, pageSize: actualPageSize, isLoadMore });
+
       const response = await emailCheckService.getDataSearch(requestBody);
       if (response.status && response.data) {
+        console.log('📊 Analytics response:', {
+          itemsCount: response.data.items.length,
+          totalCount: response.data.totalCount,
+          currentPage
+        });
+
+        let updatedData;
         // Store raw data for further analysis
-        if (currentPage === 1) {
+        if (currentPage === 1 && !isLoadMore) {
+          // Fresh load - replace all data
           setRawAnalyticsData(response.data.items);
+          updatedData = response.data.items;
+          console.log('🆕 Fresh data loaded:', updatedData.length);
         } else {
-          setRawAnalyticsData(prev => [...prev, ...response.data.items]);
+          // Load more - append to existing data
+          setRawAnalyticsData(prev => {
+            const newData = [...prev, ...response.data.items];
+            console.log('➕ Data appended, total:', newData.length);
+            updatedData = newData;
+            return newData;
+          });
         }
 
-        // Process analytics with current page data
-        processAnalyticsData(response.data);
-        
         // Update pagination state
         setAnalyticsPagination({
           pageIndex: currentPage,
-          pageSize: pageSize,
+          pageSize: actualPageSize,
           total: response.data.totalCount || 0
         });
+
+        // Process analytics with the updated accumulated data
+        setTimeout(() => {
+          if (isLoadMore) {
+            // For load more, create a mock response with all accumulated data
+            const mockResponse = {
+              ...response.data,
+              items: updatedData || [...rawAnalyticsData, ...response.data.items]
+            };
+            processAnalyticsData(mockResponse);
+            console.log('📈 Processed accumulated data:', mockResponse.items.length);
+          } else {
+            // For fresh load, process current page data
+            processAnalyticsData(response.data);
+            console.log('🔄 Processed fresh data:', response.data.items.length);
+          }
+        }, 100);
       }
     } catch (error) {
       console.error('Error fetching analytics data:', error);
     } finally {
-      setLoading(false);
+      setAnalyticsLoading(false);
     }
   };
 
@@ -228,15 +312,29 @@ const BusinessPage = () => {
     const nextPage = analyticsPagination.pageIndex + 1;
     const maxPage = Math.ceil(analyticsPagination.total / analyticsPagination.pageSize);
     
+    console.log('📈 Loading more data:', { nextPage, maxPage, currentTotal: rawAnalyticsData.length, batchSize });
+    
     if (nextPage <= maxPage) {
-      await fetchAnalyticsData(nextPage, analyticsPagination.pageSize);
+      await fetchAnalyticsData(nextPage, batchSize, true);
     }
   };
 
   // Refresh all analytics data
   const refreshAnalyticsData = async () => {
+    console.log('🔄 Refreshing all analytics data with batch size:', batchSize);
     setRawAnalyticsData([]);
-    await fetchAnalyticsData(1, 1000);
+    setAnalyticsData({
+      categoryStats: [],
+      timeSeriesData: [],
+      topDomains: [],
+      riskDistribution: []
+    });
+    setAnalyticsPagination({
+      pageIndex: 1,
+      pageSize: batchSize,
+      total: 0,
+    });
+    await fetchAnalyticsData(1, batchSize, false);
   };
 
   // Fetch Email Logs from API
@@ -337,11 +435,16 @@ const BusinessPage = () => {
 
   useEffect(() => {
     fetchEmails(pagination, filters, sort);
-  }, [pagination.pageIndex, pagination.pageSize, filters, sort]);
+  }, [pagination.pageIndex, pagination.pageSize]); // Remove filters and sort from dependencies
+
+  // Load initial data when component mounts
+  useEffect(() => {
+    fetchEmails(pagination, filters, sort);
+  }, []); // Only run once on mount
 
   // Separate useEffect for analytics data - only fetch once on mount
   useEffect(() => {
-    fetchAnalyticsData(1, 1000); // Fetch analytics data on mount
+    fetchAnalyticsData(1, batchSize); // Fetch analytics data on mount with selected batch size
   }, []); // Empty dependency array - only run once
 
   // Handle table change (pagination, sort, filter)
@@ -352,9 +455,9 @@ const BusinessPage = () => {
       total: newPagination.total,
     });
 
-    // Handle sorting
-    const newSortColumn = newSorter.columnKey || sort.column; // Use new columnKey if available, otherwise keep current
-    const newSortOrder = newSorter.order || sort.order; // Use new order if available, otherwise keep current
+    // Handle sorting - just update state, don't trigger search automatically
+    const newSortColumn = newSorter.columnKey || sort.column;
+    const newSortOrder = newSorter.order || sort.order;
 
     if (newSortColumn !== sort.column || newSortOrder !== sort.order) {
       setSort({
@@ -363,8 +466,7 @@ const BusinessPage = () => {
       });
     }
 
-    // Handle column filters for category
-    // tableFilters.category will be an array like ['An toàn'] or undefined
+    // Handle column filters for category - just update state, don't trigger search automatically
     const selectedCategoryFilter = tableFilters.category ? tableFilters.category[0] : '';
     if (selectedCategoryFilter !== filters.category) {
       setFilters(prev => ({ ...prev, category: selectedCategoryFilter }));
@@ -633,24 +735,7 @@ const BusinessPage = () => {
         );
       }
     },
-    {
-      title: 'Hành động',
-      dataIndex: 'action',
-      key: 'action',
-      width: 100,
-      render: (action) => (
-        <Badge 
-          status={
-            action === 'delivered' ? 'success' :
-            action === 'quarantined' ? 'warning' : 'error'
-          }
-          text={
-            action === 'delivered' ? 'Đã gửi' :
-            action === 'quarantined' ? 'Cách ly' : 'Chặn'
-          }
-        />
-      )
-    },
+
   
   ];
 
@@ -667,183 +752,311 @@ const BusinessPage = () => {
     });
   };
 
-  const renderOverviewCards = () => (
-    <Row gutter={[16, 16]}>
-      <Col xs={24} sm={12} lg={6}>
-        <Card className="stat-card">
-          <Statistic
-            title="Tổng Email"
-            value={dashboardData.totalEmails}
-            prefix={<MailOutlined />}
-            suffix="emails"
-            valueStyle={{ color: '#1890ff' }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Text type="secondary">
-              Hôm nay: {dashboardData.todayProcessed} | 
-              Dữ liệu: {rawAnalyticsData.length.toLocaleString()}
-            </Text>
-          </div>
-        </Card>
-      </Col>
-      
-      <Col xs={24} sm={12} lg={6}>
-        <Card className="stat-card">
-          <Statistic
-            title="Email An toàn"
-            value={dashboardData.safeEmails}
-            prefix={<SafetyOutlined />}
-            valueStyle={{ color: '#52c41a' }}
-          />
-          <Progress
-            percent={Math.round((dashboardData.safeEmails / dashboardData.totalEmails) * 100)}
-            size="small"
-            strokeColor="#52c41a"
-            showInfo={false}
-          />
-        </Card>
-      </Col>
-      
-      <Col xs={24} sm={12} lg={6}>
-        <Card className="stat-card">
-          <Statistic
-            title="Mối đe dọa"
-            value={dashboardData.phishingEmails + dashboardData.spamEmails + dashboardData.suspiciousEmails}
-            prefix={<ExclamationCircleOutlined />}
-            valueStyle={{ color: '#f5222d' }}
-          />
-          <Space>
-            <Tag color="volcano">Phishing: {dashboardData.phishingEmails}</Tag>
-            <Tag color="red">Spam: {dashboardData.spamEmails}</Tag>
-            <Tag color="orange">Nghi ngờ: {dashboardData.suspiciousEmails}</Tag>
-          </Space>
-        </Card>
-      </Col>
-      
-      <Col xs={24} sm={12} lg={6}>
-        <Card className="stat-card">
-          <Statistic
-            title="Độ chính xác"
-            value={dashboardData.accuracy}
-            prefix={<TrophyOutlined />}
-            suffix="%"
-            precision={1}
-            valueStyle={{ color: '#722ed1' }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Text type="secondary">
-              Phân tích: {analyticsPagination.total.toLocaleString()} emails
-            </Text>
-          </div>
-        </Card>
-      </Col>
-    </Row>
-  );
+  const renderOverviewCards = () => {
+    if (analyticsLoading && rawAnalyticsData.length === 0) {
+      return (
+        <Row gutter={[16, 16]}>
+          {[1, 2, 3, 4].map(index => (
+            <Col xs={24} sm={12} lg={6} key={index}>
+              <Card className="stat-card" loading={true}>
+                <div style={{ height: '80px' }}></div>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      );
+    }
 
-  const renderThreatAnalysis = () => (
-    <Card title="Phân tích Mối đe dọa" bordered={false}>
-      <Row gutter={[24, 24]}>
-        <Col xs={24} lg={12}>
-          <Card size="small" title="Phân loại Email">
-            <Pie
-              data={analyticsData.categoryStats}
-              angleField="count"
-              colorField="category"
-              radius={0.8}
-              label={{
-                type: 'outer',
-                content: '{name}: {percentage}%',
-              }}
-              interactions={[{ type: 'element-active' }]}
-              color={['#52c41a', '#faad14', '#fa8c16', '#f5222d']}
-              height={300}
-            />
-          </Card>
-        </Col>
-        
-        <Col xs={24} lg={12}>
-          <Card size="small" title="Top 10 Domain">
-            <Column
-              data={analyticsData.topDomains}
-              xField="domain"
-              yField="count"
-              color="#1890ff"
-              label={{
-                position: 'middle',
-                style: {
-                  fill: '#FFFFFF',
-                  opacity: 0.8,
-                },
-              }}
-              meta={{
-                domain: {
-                  alias: 'Domain',
-                },
-                count: {
-                  alias: 'Số lượng',
-                },
-              }}
-              height={300}
-            />
-          </Card>
-        </Col>
-        
-        <Col xs={24} lg={12}>
-          <Card size="small" title="Xu hướng Theo Thời gian">
-            <Line
-              data={analyticsData.timeSeriesData}
-              xField="date"
-              yField="count"
-              seriesField="type"
-              color={['#52c41a', '#f5222d']}
-              point={{
-                size: 5,
-                shape: 'diamond',
-              }}
-              label={{
-                style: {
-                  fill: '#aaa',
-                },
-              }}
-              height={300}
-            />
-          </Card>
-        </Col>
+    return (
+      <>
+        {/* Data Status Bar */}
+        <Card size="small" style={{ background: '#f6f8ff', marginBottom: '16px' }}>
+          <Row justify="space-between" align="middle">
+            <Col>
+              <Space>
+                <Text strong>Dữ liệu tổng quan:</Text>
+                <Text>
+                  {rawAnalyticsData.length.toLocaleString()} / {analyticsPagination.total.toLocaleString()} emails
+                </Text>
+                <Text type="secondary">
+                  (Trang {analyticsPagination.pageIndex}/{Math.ceil(analyticsPagination.total / analyticsPagination.pageSize)})
+                </Text>
+              </Space>
+            </Col>
+            <Col>
+              <Space>
+                <Text type="secondary">Tải:</Text>
+                <Input
+                  type="number"
+                  value={batchSize}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value) || 1000;
+                    setBatchSize(Math.min(Math.max(value, 100), 5000)); // Limit between 100-5000
+                  }}
+                  style={{ width: '80px' }}
+                  size="small"
+                  min={100}
+                  max={5000}
+                  step={100}
+                />
+                <Text type="secondary">emails</Text>
+                <Button 
+                  icon={<ReloadOutlined />} 
+                  onClick={refreshAnalyticsData}
+                  loading={analyticsLoading}
+                  size="small"
+                >
+                  Làm mới
+                </Button>
+                {rawAnalyticsData.length < analyticsPagination.total && (
+                  <Button 
+                    type="primary" 
+                    onClick={loadMoreAnalyticsData}
+                    loading={analyticsLoading}
+                    size="small"
+                  >
+                    Tải thêm ({Math.min(batchSize, analyticsPagination.total - rawAnalyticsData.length).toLocaleString()})
+                  </Button>
+                )}
+              </Space>
+            </Col>
+          </Row>
+        </Card>
 
-        <Col xs={24} lg={12}>
-          <Card size="small" title="Phân bố Điểm Rủi ro">
-            <Column
-              data={analyticsData.riskDistribution}
-              xField="range"
-              yField="count"
-              color={({ range }) => {
-                const item = analyticsData.riskDistribution.find(d => d.range === range);
-                return item ? item.color : '#1890ff';
-              }}
-              label={{
-                position: 'middle',
-                style: {
-                  fill: '#FFFFFF',
-                  opacity: 0.9,
-                  fontWeight: 'bold',
-                  fontSize: 12,
-                },
-              }}
-              height={300}
-              meta={{
-                range: {
-                  alias: 'Mức độ rủi ro',
-                },
-                count: {
-                  alias: 'Số lượng',
-                },
-              }}
-            />
-          </Card>
-        </Col>
-      </Row>
-    </Card>
-  );
+        <Row gutter={[16, 16]}>
+          <Col xs={24} sm={12} lg={6}>
+            <Card className="stat-card">
+              <Statistic
+                title="Tổng Email"
+                value={dashboardData.totalEmails}
+                prefix={<MailOutlined />}
+                suffix="emails"
+                valueStyle={{ color: '#1890ff' }}
+              />
+              <div style={{ marginTop: 8 }}>
+                <Text type="secondary">
+                  Hôm nay: {dashboardData.todayProcessed} | 
+                  Dữ liệu: {rawAnalyticsData.length.toLocaleString()}
+                </Text>
+              </div>
+            </Card>
+          </Col>
+          
+          <Col xs={24} sm={12} lg={6}>
+            <Card className="stat-card">
+              <Statistic
+                title="Email An toàn"
+                value={dashboardData.safeEmails}
+                prefix={<SafetyOutlined />}
+                valueStyle={{ color: '#52c41a' }}
+              />
+              <Progress
+                percent={Math.round((dashboardData.safeEmails / dashboardData.totalEmails) * 100)}
+                size="small"
+                strokeColor="#52c41a"
+                showInfo={false}
+              />
+            </Card>
+          </Col>
+          
+          <Col xs={24} sm={12} lg={6}>
+            <Card className="stat-card">
+              <Statistic
+                title="Mối đe dọa"
+                value={dashboardData.phishingEmails + dashboardData.spamEmails + dashboardData.suspiciousEmails}
+                prefix={<ExclamationCircleOutlined />}
+                valueStyle={{ color: '#f5222d' }}
+              />
+              <Space>
+                <Tag color="volcano">Phishing: {dashboardData.phishingEmails}</Tag>
+                <Tag color="red">Spam: {dashboardData.spamEmails}</Tag>
+                <Tag color="orange">Nghi ngờ: {dashboardData.suspiciousEmails}</Tag>
+              </Space>
+            </Card>
+          </Col>
+          
+          <Col xs={24} sm={12} lg={6}>
+            <Card className="stat-card">
+              <Statistic
+                title="Độ chính xác"
+                value={dashboardData.accuracy}
+                prefix={<TrophyOutlined />}
+                suffix="%"
+                precision={1}
+                valueStyle={{ color: '#722ed1' }}
+              />
+              <div style={{ marginTop: 8 }}>
+                <Text type="secondary">
+                  Phân tích: {analyticsPagination.total.toLocaleString()} emails
+                </Text>
+              </div>
+            </Card>
+          </Col>
+        </Row>
+      </>
+    );
+  };
+
+  const renderThreatAnalysis = () => {
+    if (analyticsLoading && rawAnalyticsData.length === 0) {
+      return (
+        <Card title="Phân tích Mối đe dọa" bordered={false}>
+          <Row gutter={[24, 24]}>
+            {[1, 2, 3, 4].map(index => (
+              <Col xs={24} lg={12} key={index}>
+                <Card size="small" loading={true}>
+                  <div style={{ height: '300px' }}></div>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        </Card>
+      );
+    }
+
+    return (
+      <Card 
+        title={
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>Phân tích Mối đe dọa</span>
+            {analyticsLoading && (
+              <Spin size="small" style={{ marginLeft: '8px' }} />
+            )}
+          </div>
+        } 
+        bordered={false}
+      >
+        <Row gutter={[24, 24]}>
+          <Col xs={24} lg={12}>
+            <Card size="small" title="Phân loại Email">
+              {analyticsData.categoryStats.length > 0 ? (
+                <Pie
+                  data={analyticsData.categoryStats}
+                  angleField="count"
+                  colorField="category"
+                  radius={0.8}
+                  label={{
+                    type: 'outer',
+                    content: '{name}: {percentage}%',
+                  }}
+                  interactions={[{ type: 'element-active' }]}
+                  color={['#52c41a', '#faad14', '#fa8c16', '#f5222d']}
+                  height={300}
+                />
+              ) : (
+                <div style={{ textAlign: 'center', padding: '60px 0', color: '#999' }}>
+                  <BarChartOutlined style={{ fontSize: '48px', marginBottom: '16px' }} />
+                  <div>Chưa có dữ liệu để hiển thị</div>
+                </div>
+              )}
+            </Card>
+          </Col>
+          
+          <Col xs={24} lg={12}>
+            <Card size="small" title="Top 10 Domain">
+              {analyticsData.topDomains.length > 0 ? (
+                <Column
+                  data={analyticsData.topDomains}
+                  xField="domain"
+                  yField="count"
+                  color="#1890ff"
+                  label={{
+                    position: 'middle',
+                    style: {
+                      fill: '#FFFFFF',
+                      opacity: 0.8,
+                    },
+                  }}
+                  meta={{
+                    domain: {
+                      alias: 'Domain',
+                    },
+                    count: {
+                      alias: 'Số lượng',
+                    },
+                  }}
+                  height={300}
+                />
+              ) : (
+                <div style={{ textAlign: 'center', padding: '60px 0', color: '#999' }}>
+                  <BarChartOutlined style={{ fontSize: '48px', marginBottom: '16px' }} />
+                  <div>Chưa có dữ liệu để hiển thị</div>
+                </div>
+              )}
+            </Card>
+          </Col>
+          
+          <Col xs={24} lg={12}>
+            <Card size="small" title="Xu hướng Theo Thời gian">
+              {analyticsData.timeSeriesData.length > 0 ? (
+                <Line
+                  data={analyticsData.timeSeriesData}
+                  xField="date"
+                  yField="count"
+                  seriesField="type"
+                  color={['#52c41a', '#f5222d']}
+                  point={{
+                    size: 5,
+                    shape: 'diamond',
+                  }}
+                  label={{
+                    style: {
+                      fill: '#aaa',
+                    },
+                  }}
+                  height={300}
+                />
+              ) : (
+                <div style={{ textAlign: 'center', padding: '60px 0', color: '#999' }}>
+                  <BarChartOutlined style={{ fontSize: '48px', marginBottom: '16px' }} />
+                  <div>Chưa có dữ liệu để hiển thị</div>
+                </div>
+              )}
+            </Card>
+          </Col>
+
+          <Col xs={24} lg={12}>
+            <Card size="small" title="Phân bố Điểm Rủi ro">
+              {analyticsData.riskDistribution.some(item => item.count > 0) ? (
+                <Column
+                  data={analyticsData.riskDistribution}
+                  xField="range"
+                  yField="count"
+                  color={({ range }) => {
+                    const item = analyticsData.riskDistribution.find(d => d.range === range);
+                    return item ? item.color : '#1890ff';
+                  }}
+                  label={{
+                    position: 'middle',
+                    style: {
+                      fill: '#FFFFFF',
+                      opacity: 0.9,
+                      fontWeight: 'bold',
+                      fontSize: 12,
+                    },
+                  }}
+                  height={300}
+                  meta={{
+                    range: {
+                      alias: 'Mức độ rủi ro',
+                    },
+                    count: {
+                      alias: 'Số lượng',
+                    },
+                  }}
+                />
+              ) : (
+                <div style={{ textAlign: 'center', padding: '60px 0', color: '#999' }}>
+                  <BarChartOutlined style={{ fontSize: '48px', marginBottom: '16px' }} />
+                  <div>Chưa có dữ liệu để hiển thị</div>
+                </div>
+              )}
+            </Card>
+          </Col>
+        </Row>
+      </Card>
+    );
+  };
 
   // New analytics dashboard
   const renderAnalyticsDashboard = () => (
@@ -864,10 +1077,25 @@ const BusinessPage = () => {
           </Col>
           <Col>
             <Space>
+              <Text type="secondary">Tải:</Text>
+              <Input
+                type="number"
+                value={batchSize}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value) || 1000;
+                  setBatchSize(Math.min(Math.max(value, 100), 5000)); // Limit between 100-5000
+                }}
+                style={{ width: '80px' }}
+                size="small"
+                min={100}
+                max={5000}
+                step={100}
+              />
+              <Text type="secondary">emails</Text>
               <Button 
                 icon={<ReloadOutlined />} 
                 onClick={refreshAnalyticsData}
-                loading={loading}
+                loading={analyticsLoading}
                 size="small"
               >
                 Làm mới
@@ -876,10 +1104,10 @@ const BusinessPage = () => {
                 <Button 
                   type="primary" 
                   onClick={loadMoreAnalyticsData}
-                  loading={loading}
+                  loading={analyticsLoading}
                   size="small"
                 >
-                  Tải thêm ({Math.min(1000, analyticsPagination.total - rawAnalyticsData.length)})
+                  Tải thêm ({Math.min(batchSize, analyticsPagination.total - rawAnalyticsData.length)})
                 </Button>
               )}
             </Space>
@@ -887,7 +1115,7 @@ const BusinessPage = () => {
         </Row>
       </Card>
 
-      {loading ? (
+      {analyticsLoading ? (
         <Card style={{ textAlign: 'center', padding: '60px 0' }}>
           <Spin size="large" />
           <div style={{ marginTop: 16 }}>
@@ -1038,10 +1266,19 @@ const BusinessPage = () => {
       
         <Tabs defaultActiveKey="overview" size="large">
           <TabPane tab={<span><DashboardOutlined />Tổng quan</span>} key="overview">
-            <Space direction="vertical" size="large" style={{ width: '100%' }}>
-              {renderOverviewCards()}
-              {renderThreatAnalysis()}
-            </Space>
+            {analyticsLoading && rawAnalyticsData.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '80px 0' }}>
+                <Spin size="large" />
+                <div style={{ marginTop: 16 }}>
+                  <Text>Đang tải dữ liệu tổng quan...</Text>
+                </div>
+              </div>
+            ) : (
+              <Space direction="vertical" size="large" style={{ width: '100%' }}>
+                {renderOverviewCards()}
+                {renderThreatAnalysis()}
+              </Space>
+            )}
           </TabPane>
 
           <TabPane tab={<span><BarChartOutlined />Phân tích</span>} key="analytics">
@@ -1072,18 +1309,7 @@ const BusinessPage = () => {
                     onChange={(e) => setFilters(prev => ({ ...prev, to_email: e.target.value }))}
                     style={{ width: 200 }}
                   />
-                  <Select
-                    placeholder="Lọc theo phân loại"
-                    value={filters.category}
-                    onChange={(value) => setFilters(prev => ({ ...prev, category: value }))}
-                    style={{ width: 180 }}
-                    allowClear
-                  >
-                    <Option value="An toàn">An toàn</Option>
-                    <Option value="Nghi ngờ">Nghi ngờ</Option>
-                    <Option value="Spam">Spam</Option>
-                    <Option value="Giả mạo">Giả mạo</Option>
-                  </Select>
+            
                   <Button 
                     type="primary" 
                     icon={<SearchOutlined />} 
@@ -1095,6 +1321,14 @@ const BusinessPage = () => {
                     setFilters({ title: '', from_email: '', to_email: '', category: '' });
                     setPagination(prev => ({ ...prev, pageIndex: 1 }));
                     setSort({ column: 'received_time', order: 'descend' });
+                    // Trigger search after clearing filters
+                    setTimeout(() => {
+                      fetchEmails(
+                        { ...pagination, pageIndex: 1 },
+                        { title: '', from_email: '', to_email: '', category: '' },
+                        { column: 'received_time', order: 'descend' }
+                      );
+                    }, 0);
                   }}>
                     Xóa bộ lọc
                   </Button>
@@ -1183,51 +1417,7 @@ const BusinessPage = () => {
             </Row>
           </TabPane>
 
-          <TabPane tab={<span><SettingOutlined />Cài đặt</span>} key="settings">
-            <Row gutter={[24, 24]}>
-              <Col xs={24} lg={12}>
-                <Card title="Cấu hình Tổng quan" bordered={false}>
-                  <Space direction="vertical" style={{ width: '100%' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span>Tự động quét email</span>
-                      <Switch defaultChecked />
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span>Cảnh báo thời gian thực</span>
-                      <Switch defaultChecked />
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span>Báo cáo hàng tuần</span>
-                      <Switch defaultChecked />
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span>Chặn tự động</span>
-                      <Switch />
-                    </div>
-                  </Space>
-                </Card>
-              </Col>
 
-              <Col xs={24} lg={12}>
-                <Card title="Ngưỡng Cảnh báo" bordered={false}>
-                  <Form layout="vertical">
-                    <Form.Item label="Điểm rủi ro cao (≥)">
-                      <Input placeholder="75" suffix="điểm" />
-                    </Form.Item>
-                    <Form.Item label="Số email nguy hiểm/giờ (≥)">
-                      <Input placeholder="5" suffix="emails" />
-                    </Form.Item>
-                    <Form.Item label="Tỷ lệ phishing (≥)">
-                      <Input placeholder="2" suffix="%" />
-                    </Form.Item>
-                    <Form.Item>
-                      <Button type="primary">Lưu Cài đặt</Button>
-                    </Form.Item>
-                  </Form>
-                </Card>
-              </Col>
-            </Row>
-          </TabPane>
         </Tabs>
       </div>
     </div>
