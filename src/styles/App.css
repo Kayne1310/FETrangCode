@@ -88,6 +88,7 @@ html, body {
   padding: 0 20px;
   width: 100%;
   height: 64px; /* Match header height */
+  position: relative;
 }
 
 .logo {
@@ -145,30 +146,38 @@ html, body {
 /* Mobile Menu Button */
 .mobile-menu-button {
   display: none;
+  z-index: 1002;
 }
 
 .mobile-menu-toggle {
   color: white !important;
-  font-size: 1.2rem;
-  height: 40px;
-  width: 40px;
+  font-size: 1.4rem;
+  height: 44px;
+  width: 44px;
   border: none;
   background: transparent !important;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
+  border-radius: 8px;
 }
 
 .mobile-menu-toggle:hover {
   background: rgba(255, 255, 255, 0.1) !important;
   color: #ffd700 !important;
+  transform: scale(1.05);
+}
+
+.mobile-menu-toggle:active {
+  transform: scale(0.95);
 }
 
 /* Mobile Drawer */
 .mobile-drawer .ant-drawer-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-bottom: none;
+  padding: 16px 24px;
 }
 
 .mobile-drawer .ant-drawer-title {
@@ -179,31 +188,46 @@ html, body {
 
 .mobile-drawer .ant-drawer-close {
   color: white;
+  font-size: 1.2rem;
+}
+
+.mobile-drawer .ant-drawer-body {
+  padding: 0;
 }
 
 .mobile-nav-menu {
   border-right: none;
   background: transparent;
+  padding: 16px;
 }
 
 .mobile-nav-menu .ant-menu-item {
   font-weight: 500;
   font-size: 1rem;
-  padding: 12px 16px !important;
-  margin: 4px 0 !important;
-  border-radius: 8px;
+  padding: 16px 20px !important;
+  margin: 8px 0 !important;
+  border-radius: 12px;
   transition: all 0.3s ease;
+  height: auto;
+  line-height: 1.5;
 }
 
 .mobile-nav-menu .ant-menu-item:hover {
   background: rgba(102, 126, 234, 0.1) !important;
   color: #667eea !important;
+  transform: translateX(4px);
 }
 
 .mobile-nav-menu .ant-menu-item-selected {
   background: rgba(102, 126, 234, 0.15) !important;
   color: #667eea !important;
   font-weight: 600;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.mobile-nav-menu .ant-menu-item .anticon {
+  font-size: 1.2rem;
+  margin-right: 12px;
 }
 
 .header-actions {
@@ -253,20 +277,48 @@ html, body {
   font-weight: 800 !important;
   line-height: 1.2 !important;
   margin-bottom: 24px !important;
+  color: white;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  letter-spacing: -0.02em;
+  transition: all 0.3s ease;
+}
+
+.hero-title:hover {
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transform: translateY(-1px);
 }
 
 .text-gradient {
-  background: linear-gradient(45deg, #ffd700, #ff6b6b);
+  background: linear-gradient(45deg, #ffd700, #ff6b6b, #ffd700);
+  background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  animation: gradientShift 3s ease-in-out infinite;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
 .hero-description {
-  font-size: clamp(1.1rem, 2.5vw, 1.3rem) !important;
+  font-size: clamp(1.2rem, 2.8vw, 1.5rem) !important;
   margin-bottom: 32px !important;
-  opacity: 0.9;
-  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.7;
+  font-weight: 400;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.01em;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.hero-description:hover {
+  color: white;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);
 }
 
 .hero-features {
@@ -278,14 +330,15 @@ html, body {
   align-items: center;
   margin: 16px 0;
   font-size: clamp(0.9rem, 2vw, 1.1rem);
-  background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 16px 20px;
   border-radius: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 212, 170, 0.3);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25);
+  backdrop-filter: blur(10px);
 }
 
 .feature-item::before {
@@ -305,9 +358,9 @@ html, body {
 
 .feature-item:hover {
   transform: translateX(8px) translateY(-2px);
-  background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
-  border-color: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 12px 32px rgba(0, 212, 170, 0.5);
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
 }
 
 .feature-item:nth-child(1) {
@@ -325,7 +378,7 @@ html, body {
 .feature-icon {
   font-size: 1.4rem;
   margin-right: 16px;
-  color: #ffffff;
+  color: #ffd700;
   flex-shrink: 0;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
   transition: all 0.3s ease;
@@ -339,14 +392,14 @@ html, body {
 
 .feature-item span {
   font-weight: 600;
-  color: #1a1a1a;
+  color: white;
   transition: all 0.3s ease;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .feature-item:hover span {
-  color: #000000;
-  text-shadow: 0 2px 4px rgba(255, 255, 255, 0.5);
+  color: #ffd700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
   font-weight: 700;
 }
 
@@ -369,19 +422,20 @@ html, body {
 }
 
 .cta-button {
-  background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+  background: linear-gradient(45deg, #667eea, #764ba2);
   border: none;
   height: clamp(45px, 6vw, 55px);
   padding: 0 clamp(20px, 4vw, 32px);
   font-size: clamp(1rem, 2vw, 1.1rem);
   font-weight: 700;
   min-width: 140px;
-  box-shadow: 0 8px 24px rgba(255, 107, 107, 0.4);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
   color: white;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
 }
 
 .cta-button::before {
@@ -401,8 +455,8 @@ html, body {
 
 .cta-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(255, 107, 107, 0.6);
-  background: linear-gradient(45deg, #ff5252, #ff7043);
+  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
+  background: linear-gradient(45deg, #5a6fd8, #6a4190);
   color: white;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
@@ -412,15 +466,17 @@ html, body {
   padding: 0 clamp(20px, 4vw, 32px);
   font-size: clamp(1rem, 2vw, 1.1rem);
   font-weight: 600;
-  border: 3px solid #ffd700;
-  background: rgba(255, 215, 0, 0.15);
-  color: #ffd700;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
   min-width: 140px;
-  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.3);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
 }
 
 .secondary-button::before {
@@ -430,7 +486,7 @@ html, body {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   transition: left 0.5s ease;
 }
 
@@ -439,11 +495,11 @@ html, body {
 }
 
 .secondary-button:hover {
-  background: rgba(255, 215, 0, 0.25);
-  border-color: #ffed4e;
-  color: #ffed4e;
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #ffd700;
   transform: translateY(-2px);
-  box-shadow: 0 10px 28px rgba(255, 215, 0, 0.5);
+  box-shadow: 0 10px 28px rgba(255, 255, 255, 0.3);
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   font-weight: 700;
 }
@@ -1527,15 +1583,19 @@ html, body {
 
 @media (max-width: 992px) {
   .desktop-menu {
-    display: none;
+    display: none !important;
   }
   
   .mobile-menu-button {
-    display: block;
+    display: block !important;
   }
   
   .nav-menu {
-    display: none;
+    display: none !important;
+  }
+  
+  .header-container {
+    justify-content: space-between;
   }
   
   .business-page .page-header .ant-row {
@@ -1554,6 +1614,24 @@ html, body {
 }
 
 @media (max-width: 768px) {
+  .header-container {
+    padding: 0 16px;
+  }
+  
+  .logo-text {
+    font-size: 1.1rem;
+  }
+  
+  .logo-icon {
+    font-size: 1.3rem;
+  }
+  
+  .mobile-menu-toggle {
+    height: 40px;
+    width: 40px;
+    font-size: 1.2rem;
+  }
+  
   .check-page .quick-actions-card,
   .business-page .stat-card {
     margin-bottom: 16px;

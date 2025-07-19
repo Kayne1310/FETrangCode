@@ -1417,51 +1417,7 @@ const BusinessPage = () => {
             </Row>
           </TabPane>
 
-          <TabPane tab={<span><SettingOutlined />Cài đặt</span>} key="settings">
-            <Row gutter={[24, 24]}>
-              <Col xs={24} lg={12}>
-                <Card title="Cấu hình Tổng quan" bordered={false}>
-                  <Space direction="vertical" style={{ width: '100%' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span>Tự động quét email</span>
-                      <Switch defaultChecked />
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span>Cảnh báo thời gian thực</span>
-                      <Switch defaultChecked />
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span>Báo cáo hàng tuần</span>
-                      <Switch defaultChecked />
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span>Chặn tự động</span>
-                      <Switch />
-                    </div>
-                  </Space>
-                </Card>
-              </Col>
 
-              <Col xs={24} lg={12}>
-                <Card title="Ngưỡng Cảnh báo" bordered={false}>
-                  <Form layout="vertical">
-                    <Form.Item label="Điểm rủi ro cao (≥)">
-                      <Input placeholder="75" suffix="điểm" />
-                    </Form.Item>
-                    <Form.Item label="Số email nguy hiểm/giờ (≥)">
-                      <Input placeholder="5" suffix="emails" />
-                    </Form.Item>
-                    <Form.Item label="Tỷ lệ phishing (≥)">
-                      <Input placeholder="2" suffix="%" />
-                    </Form.Item>
-                    <Form.Item>
-                      <Button type="primary">Lưu Cài đặt</Button>
-                    </Form.Item>
-                  </Form>
-                </Card>
-              </Col>
-            </Row>
-          </TabPane>
         </Tabs>
       </div>
     </div>
