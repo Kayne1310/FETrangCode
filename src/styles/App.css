@@ -978,6 +978,56 @@ html, body {
   padding: clamp(20px, 4vw, 32px);
 }
 
+/* Enhanced touch targets for lesson cards */
+.article-card .ant-card-actions {
+  padding: 12px 0;
+}
+
+.article-card .ant-card-actions > li {
+  margin: 0;
+  padding: 0;
+}
+
+.article-card .ant-card-actions .ant-btn {
+  width: 100%;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  margin: 0 8px;
+  color: #1890ff;
+  border: 2px solid #1890ff;
+  background: transparent;
+}
+
+.article-card .ant-card-actions .ant-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+  background: #1890ff;
+  color: white;
+  border-color: #1890ff;
+}
+
+.article-card .ant-card-actions .ant-btn:active {
+  transform: translateY(0);
+}
+
+/* Mobile touch target improvements */
+@media (max-width: 768px) {
+  .article-card .ant-card-actions .ant-btn {
+    height: 56px;
+    font-size: 18px;
+    padding: 16px 24px;
+    margin: 0 4px;
+  }
+}
+
 .article-header {
   display: flex;
   justify-content: space-between;
@@ -1255,6 +1305,293 @@ html, body {
 /* Business Page Styles */
 .business-page .page-header .ant-row {
   align-items: flex-start;
+}
+
+/* Lesson Page Styles */
+.lesson-page {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  min-height: 100vh;
+  padding: 20px 0;
+}
+
+.lesson-page .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.lesson-page .page-header {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.lesson-page .ant-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.lesson-page .ant-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.lesson-page .ant-steps-item-process .ant-steps-item-icon {
+  background: #f5576c;
+  border-color: #f5576c;
+}
+
+.lesson-page .ant-steps-item-finish .ant-steps-item-icon {
+  background: #52c41a;
+  border-color: #52c41a;
+}
+
+.lesson-page .ant-progress-circle .ant-progress-text {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.lesson-page .ant-alert {
+  border-radius: 8px;
+  border: none;
+}
+
+.lesson-page .ant-list-item {
+  padding: 12px 0;
+}
+
+.lesson-page .ant-collapse {
+  background: transparent;
+  border: none;
+}
+
+.lesson-page .ant-collapse-item {
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: white;
+}
+
+.lesson-page .ant-checkbox-wrapper {
+  font-size: 14px;
+}
+
+.lesson-page .ant-radio-group {
+  width: 100%;
+}
+
+.lesson-page .ant-radio-button-wrapper {
+  text-align: left;
+  height: auto;
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  border: 1px solid #d9d9d9;
+}
+
+.lesson-page .ant-radio-button-wrapper-checked {
+  border-color: #f5576c;
+  color: #f5576c;
+}
+
+.lesson-page .ant-tag {
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.lesson-page .ant-space {
+  width: 100%;
+}
+
+.lesson-page .ant-btn {
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.lesson-page .ant-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.lesson-page .ant-btn-primary {
+  background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+  border: none;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 8px;
+  min-width: 120px;
+}
+
+.lesson-page .ant-btn-primary:hover {
+  background: linear-gradient(135deg, #e74c3c 0%, #e91e63 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3);
+}
+
+.lesson-page .ant-btn {
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 8px;
+  min-width: 120px;
+  transition: all 0.3s ease;
+}
+
+.lesson-page .ant-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Consistent button sizes for lesson pages */
+.lesson-page .ant-btn-large {
+  height: 56px;
+  font-size: 18px;
+  padding: 16px 32px;
+  min-width: 140px;
+}
+
+.lesson-page .ant-radio-button-wrapper {
+  height: 48px;
+  line-height: 46px;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 0 20px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  border: 2px solid #d9d9d9;
+  transition: all 0.3s ease;
+}
+
+.lesson-page .ant-radio-button-wrapper:hover {
+  border-color: #f5576c;
+  color: #f5576c;
+}
+
+.lesson-page .ant-radio-button-wrapper-checked {
+  border-color: #f5576c;
+  color: #f5576c;
+  background: rgba(245, 87, 108, 0.1);
+}
+
+/* Mobile responsive buttons */
+@media (max-width: 768px) {
+  .lesson-page .ant-btn,
+  .lesson-page .ant-btn-primary {
+    height: 56px;
+    font-size: 18px;
+    padding: 16px 24px;
+    min-width: 100px;
+  }
+  
+  .lesson-page .ant-btn-large {
+    height: 64px;
+    font-size: 20px;
+    padding: 20px 28px;
+    min-width: 120px;
+  }
+  
+  .lesson-page .ant-radio-button-wrapper {
+    height: 56px;
+    line-height: 54px;
+    font-size: 18px;
+    padding: 0 16px;
+  }
+}
+
+.lesson-page .ant-typography h1 {
+  color: #1a1a1a;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.lesson-page .ant-typography h3 {
+  color: #2c3e50;
+  font-weight: 600;
+  margin-bottom: 16px !important;
+}
+
+.lesson-page .ant-typography h5 {
+  color: #34495e;
+  font-weight: 500;
+  margin-bottom: 8px !important;
+}
+
+.lesson-page .ant-typography p {
+  color: #555;
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+.lesson-page .ant-typography strong {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.lesson-page .ant-card-head-title {
+  color: #1a1a1a;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.lesson-page .ant-list-item-meta-title {
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.lesson-page .ant-list-item-meta-description {
+  color: #666;
+  line-height: 1.5;
+}
+
+.lesson-page .ant-alert-message {
+  color: #1a1a1a;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.lesson-page .ant-alert-description {
+  color: #555;
+  line-height: 1.6;
+}
+
+.lesson-page .ant-tag {
+  color: white;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.lesson-page .ant-progress-text {
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+/* Responsive adjustments for lesson pages */
+@media (max-width: 768px) {
+  .lesson-page .container {
+    padding: 0 16px;
+  }
+  
+  .lesson-page .page-header {
+    padding: 16px;
+  }
+  
+  .lesson-page .ant-steps-item-title {
+    font-size: 12px;
+  }
+  
+  .lesson-page .ant-steps-item-description {
+    display: none;
+  }
 }
 
 .stat-card {

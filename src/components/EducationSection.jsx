@@ -166,7 +166,18 @@ const EducationSection = () => {
                   bordered={false} 
                   hoverable
                   actions={[
-                    <Button type="link" icon={<EyeOutlined />}>
+                    <Button 
+                      type="link" 
+                      icon={<EyeOutlined />}
+                      onClick={() => {
+                        const lessonRoutes = {
+                          1: '/lesson/phishing',
+                          2: '/lesson/security', 
+                          3: '/lesson/spam'
+                        };
+                        window.location.href = lessonRoutes[article.id];
+                      }}
+                    >
                       Đọc thêm
                     </Button>
                   ]}
