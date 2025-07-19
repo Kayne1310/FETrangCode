@@ -29,9 +29,9 @@ const BlogPage = () => {
   const [selectedPost, setSelectedPost] = useState(null);
 
   const categories = [
-    { value: 'all', label: 'Tất cả', count: 24 },
-    { value: 'phishing', label: 'Phishing', count: 8 },
-    { value: 'spam', label: 'Spam', count: 6 },
+    { value: 'all', label: 'Tất cả', count: 30 },
+    { value: 'phishing', label: 'Phishing', count: 12 },
+    { value: 'spam', label: 'Spam', count: 8 },
     { value: 'security', label: 'Bảo mật', count: 7 },
     { value: 'tips', label: 'Mẹo hay', count: 3 }
   ];
@@ -69,7 +69,7 @@ const BlogPage = () => {
       readTime: 5,
       views: 1248,
       likes: 156,
-      image: '/api/placeholder/400/250',
+      image: '/images/Phishing-Email-la-gi.jpg',
       tags: ['phishing', 'bảo mật', 'email', 'lừa đảo']
     },
     {
@@ -110,7 +110,7 @@ const BlogPage = () => {
       readTime: 7,
       views: 892,
       likes: 98,
-      image: '/api/placeholder/400/250',
+      image: '/images/Phishing-email-concept-image-shows-burglar-using-a-fishing-rod..jpeg',
       tags: ['spam', 'email filter', 'bảo mật']
     },
     {
@@ -149,7 +149,7 @@ const BlogPage = () => {
       readTime: 8,
       views: 1456,
       likes: 203,
-      image: '/api/placeholder/400/250',
+      image: '/images/email-gia-mao-la-gi.png',
       tags: ['doanh nghiệp', 'bảo mật', '2FA', 'mã hóa']
     },
     {
@@ -185,7 +185,7 @@ const BlogPage = () => {
       readTime: 4,
       views: 734,
       likes: 89,
-      image: '/api/placeholder/400/250',
+      image: '/images/cach-nhan-dang-email-lua-dao-1.jpg',
       tags: ['mẹo hay', 'cá nhân', 'mật khẩu', 'bảo mật']
     },
     {
@@ -226,8 +226,49 @@ const BlogPage = () => {
       readTime: 6,
       views: 1023,
       likes: 142,
-      image: '/api/placeholder/400/250',
+      image: '/images/1750910208_phong-tranh-pishing.png',
       tags: ['social engineering', 'tâm lý', 'phòng tránh']
+    },
+    {
+      id: 6,
+      title: 'Phishing 2024: Xu hướng và Phương pháp Tấn công Mới',
+      excerpt: 'Cập nhật những xu hướng phishing mới nhất trong năm 2024 và cách phòng tránh hiệu quả.',
+      content: `
+        <h2>Phishing trong năm 2024</h2>
+        <p>Năm 2024 chứng kiến sự gia tăng đáng kể các cuộc tấn công phishing với nhiều kỹ thuật tinh vi và khó phát hiện hơn.</p>
+        
+        <h2>Các xu hướng mới:</h2>
+        
+        <h3>1. AI-powered Phishing</h3>
+        <p>Sử dụng trí tuệ nhân tạo để tạo ra các email phishing có tính cá nhân hóa cao và khó phát hiện.</p>
+        
+        <h3>2. Deepfake trong Email</h3>
+        <p>Sử dụng công nghệ deepfake để tạo ra hình ảnh, âm thanh giả mạo trong email.</p>
+        
+        <h3>3. Multi-channel Phishing</h3>
+        <p>Kết hợp email với SMS, social media và các kênh khác để tăng tính thuyết phục.</p>
+        
+        <h3>4. Cloud-based Phishing</h3>
+        <p>Lợi dụng các dịch vụ cloud hợp pháp để host các trang phishing.</p>
+        
+        <h2>Cách phòng tránh:</h2>
+        <ul>
+        <li>Cập nhật kiến thức về các kỹ thuật mới</li>
+        <li>Sử dụng các công cụ anti-phishing tiên tiến</li>
+        <li>Đào tạo nhận thức bảo mật thường xuyên</li>
+        <li>Xác minh đa kênh trước khi hành động</li>
+        </ul>
+        
+        <p><strong>Kết luận:</strong> Phishing ngày càng tinh vi, cần sự cảnh giác cao và cập nhật kiến thức liên tục.</p>
+      `,
+      category: 'phishing',
+      author: 'Nguyễn Minh',
+      publishDate: '2025-01-13',
+      readTime: 6,
+      views: 1567,
+      likes: 234,
+      image: '/images/Phishing.IS_.2024-03-26-1.png',
+      tags: ['phishing', '2024', 'AI', 'xu hướng']
     }
   ];
 
@@ -425,6 +466,96 @@ const BlogPage = () => {
             Chia sẻ kiến thức, mẹo hay và cập nhật mới nhất về bảo mật email
           </Paragraph>
         </div>
+
+        {/* Featured Post Hero Section */}
+        <Card 
+          className="hero-post-card" 
+          bordered={false} 
+          style={{ 
+            marginBottom: 32,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+            overflow: 'hidden'
+          }}
+        >
+          <Row gutter={[24, 24]} align="middle">
+            <Col xs={24} lg={12}>
+              <div style={{ padding: '20px 0' }}>
+                <Tag 
+                  color="gold" 
+                  style={{ marginBottom: 16, fontSize: '12px', fontWeight: 'bold' }}
+                >
+                  🔥 BÀI VIẾT NỔI BẬT
+                </Tag>
+                <Title 
+                  level={2} 
+                  style={{ 
+                    color: 'white', 
+                    marginBottom: 16,
+                    fontSize: 'clamp(1.5rem, 4vw, 2.2rem)'
+                  }}
+                >
+                  {blogPosts[0].title}
+                </Title>
+                <Paragraph 
+                  style={{ 
+                    color: 'rgba(255,255,255,0.9)', 
+                    fontSize: '16px',
+                    marginBottom: 20 
+                  }}
+                >
+                  {blogPosts[0].excerpt}
+                </Paragraph>
+                <Space size="large">
+                  <Space>
+                    <UserOutlined />
+                    <Text style={{ color: 'white' }}>{blogPosts[0].author}</Text>
+                  </Space>
+                  <Space>
+                    <EyeOutlined />
+                    <Text style={{ color: 'white' }}>{blogPosts[0].views} lượt xem</Text>
+                  </Space>
+                  <Space>
+                    <CalendarOutlined />
+                    <Text style={{ color: 'white' }}>
+                      {new Date(blogPosts[0].publishDate).toLocaleDateString('vi-VN')}
+                    </Text>
+                  </Space>
+                </Space>
+                <div style={{ marginTop: 20 }}>
+                  <Button 
+                    type="primary" 
+                    size="large"
+                    style={{ 
+                      background: 'rgba(255,255,255,0.2)',
+                      border: '2px solid rgba(255,255,255,0.3)',
+                      backdropFilter: 'blur(10px)'
+                    }}
+                    onClick={() => handleReadMore(blogPosts[0])}
+                  >
+                    Đọc ngay →
+                  </Button>
+                </div>
+              </div>
+            </Col>
+            <Col xs={24} lg={12}>
+              <div style={{ textAlign: 'center' }}>
+                <img 
+                  src={blogPosts[0].image}
+                  alt={blogPosts[0].title}
+                  style={{ 
+                    width: '100%',
+                    maxWidth: '400px',
+                    height: '250px',
+                    objectFit: 'cover',
+                    borderRadius: '12px',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.3)'
+                  }}
+                />
+              </div>
+            </Col>
+          </Row>
+        </Card>
 
         {/* Search and Filters */}
         <Card className="search-filters" bordered={false} style={{ marginBottom: 24 }}>

@@ -1035,22 +1035,7 @@ const BusinessPage = () => {
         </div>
 
         {/* Alert for critical threats */}
-        {!alertVisible && (
-          <Alert
-            message="Cảnh báo Bảo mật"
-            description="Phát hiện 3 email phishing trong 1 giờ qua. Vui lòng kiểm tra và cập nhật chính sách bảo mật."
-            type="warning"
-            showIcon
-            closable
-            onClose={() => setAlertVisible(true)}
-            action={
-              <Button size="small" type="link">
-                Xem chi tiết
-              </Button>
-            }
-          />
-        )}
-
+      
         <Tabs defaultActiveKey="overview" size="large">
           <TabPane tab={<span><DashboardOutlined />Tổng quan</span>} key="overview">
             <Space direction="vertical" size="large" style={{ width: '100%' }}>
