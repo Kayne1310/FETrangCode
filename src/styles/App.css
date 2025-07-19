@@ -902,7 +902,7 @@ html, body {
 .check-page,
 .business-page,
 .blog-page {
-  padding: clamp(20px, 4vh, 40px) 0;
+
   width: 100%;
 }
 

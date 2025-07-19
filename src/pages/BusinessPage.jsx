@@ -33,6 +33,7 @@ const { TabPane } = Tabs;
 
 const BusinessPage = () => {
   const [loading, setLoading] = useState(false);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState('7days');
   const [alertVisible, setAlertVisible] = useState(false);
@@ -188,7 +189,7 @@ const BusinessPage = () => {
 
   // Fetch analytics data with pagination support
   const fetchAnalyticsData = async (currentPage = 1, pageSize = 1000) => {
-    setLoading(true);
+    setAnalyticsLoading(true);
     try {
       const requestBody = {
         pageIndex: currentPage,
@@ -219,7 +220,7 @@ const BusinessPage = () => {
     } catch (error) {
       console.error('Error fetching analytics data:', error);
     } finally {
-      setLoading(false);
+      setAnalyticsLoading(false);
     }
   };
 
@@ -337,7 +338,12 @@ const BusinessPage = () => {
 
   useEffect(() => {
     fetchEmails(pagination, filters, sort);
-  }, [pagination.pageIndex, pagination.pageSize, filters, sort]);
+  }, [pagination.pageIndex, pagination.pageSize]); // Remove filters and sort from dependencies
+
+  // Load initial data when component mounts
+  useEffect(() => {
+    fetchEmails(pagination, filters, sort);
+  }, []); // Only run once on mount
 
   // Separate useEffect for analytics data - only fetch once on mount
   useEffect(() => {
@@ -352,9 +358,9 @@ const BusinessPage = () => {
       total: newPagination.total,
     });
 
-    // Handle sorting
-    const newSortColumn = newSorter.columnKey || sort.column; // Use new columnKey if available, otherwise keep current
-    const newSortOrder = newSorter.order || sort.order; // Use new order if available, otherwise keep current
+    // Handle sorting - just update state, don't trigger search automatically
+    const newSortColumn = newSorter.columnKey || sort.column;
+    const newSortOrder = newSorter.order || sort.order;
 
     if (newSortColumn !== sort.column || newSortOrder !== sort.order) {
       setSort({
@@ -363,8 +369,7 @@ const BusinessPage = () => {
       });
     }
 
-    // Handle column filters for category
-    // tableFilters.category will be an array like ['An toàn'] or undefined
+    // Handle column filters for category - just update state, don't trigger search automatically
     const selectedCategoryFilter = tableFilters.category ? tableFilters.category[0] : '';
     if (selectedCategoryFilter !== filters.category) {
       setFilters(prev => ({ ...prev, category: selectedCategoryFilter }));
@@ -667,183 +672,217 @@ const BusinessPage = () => {
     });
   };
 
-  const renderOverviewCards = () => (
-    <Row gutter={[16, 16]}>
-      <Col xs={24} sm={12} lg={6}>
-        <Card className="stat-card">
-          <Statistic
-            title="Tổng Email"
-            value={dashboardData.totalEmails}
-            prefix={<MailOutlined />}
-            suffix="emails"
-            valueStyle={{ color: '#1890ff' }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Text type="secondary">
-              Hôm nay: {dashboardData.todayProcessed} | 
-              Dữ liệu: {rawAnalyticsData.length.toLocaleString()}
-            </Text>
-          </div>
-        </Card>
-      </Col>
-      
-      <Col xs={24} sm={12} lg={6}>
-        <Card className="stat-card">
-          <Statistic
-            title="Email An toàn"
-            value={dashboardData.safeEmails}
-            prefix={<SafetyOutlined />}
-            valueStyle={{ color: '#52c41a' }}
-          />
-          <Progress
-            percent={Math.round((dashboardData.safeEmails / dashboardData.totalEmails) * 100)}
-            size="small"
-            strokeColor="#52c41a"
-            showInfo={false}
-          />
-        </Card>
-      </Col>
-      
-      <Col xs={24} sm={12} lg={6}>
-        <Card className="stat-card">
-          <Statistic
-            title="Mối đe dọa"
-            value={dashboardData.phishingEmails + dashboardData.spamEmails + dashboardData.suspiciousEmails}
-            prefix={<ExclamationCircleOutlined />}
-            valueStyle={{ color: '#f5222d' }}
-          />
-          <Space>
-            <Tag color="volcano">Phishing: {dashboardData.phishingEmails}</Tag>
-            <Tag color="red">Spam: {dashboardData.spamEmails}</Tag>
-            <Tag color="orange">Nghi ngờ: {dashboardData.suspiciousEmails}</Tag>
-          </Space>
-        </Card>
-      </Col>
-      
-      <Col xs={24} sm={12} lg={6}>
-        <Card className="stat-card">
-          <Statistic
-            title="Độ chính xác"
-            value={dashboardData.accuracy}
-            prefix={<TrophyOutlined />}
-            suffix="%"
-            precision={1}
-            valueStyle={{ color: '#722ed1' }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Text type="secondary">
-              Phân tích: {analyticsPagination.total.toLocaleString()} emails
-            </Text>
-          </div>
-        </Card>
-      </Col>
-    </Row>
-  );
+  const renderOverviewCards = () => {
+    if (analyticsLoading) {
+      return (
+        <Row gutter={[16, 16]}>
+          {[1, 2, 3, 4].map(index => (
+            <Col xs={24} sm={12} lg={6} key={index}>
+              <Card className="stat-card" loading={true}>
+                <div style={{ height: '80px' }}></div>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      );
+    }
 
-  const renderThreatAnalysis = () => (
-    <Card title="Phân tích Mối đe dọa" bordered={false}>
-      <Row gutter={[24, 24]}>
-        <Col xs={24} lg={12}>
-          <Card size="small" title="Phân loại Email">
-            <Pie
-              data={analyticsData.categoryStats}
-              angleField="count"
-              colorField="category"
-              radius={0.8}
-              label={{
-                type: 'outer',
-                content: '{name}: {percentage}%',
-              }}
-              interactions={[{ type: 'element-active' }]}
-              color={['#52c41a', '#faad14', '#fa8c16', '#f5222d']}
-              height={300}
+    return (
+      <Row gutter={[16, 16]}>
+        <Col xs={24} sm={12} lg={6}>
+          <Card className="stat-card">
+            <Statistic
+              title="Tổng Email"
+              value={dashboardData.totalEmails}
+              prefix={<MailOutlined />}
+              suffix="emails"
+              valueStyle={{ color: '#1890ff' }}
+            />
+            <div style={{ marginTop: 8 }}>
+              <Text type="secondary">
+                Hôm nay: {dashboardData.todayProcessed} | 
+                Dữ liệu: {rawAnalyticsData.length.toLocaleString()}
+              </Text>
+            </div>
+          </Card>
+        </Col>
+        
+        <Col xs={24} sm={12} lg={6}>
+          <Card className="stat-card">
+            <Statistic
+              title="Email An toàn"
+              value={dashboardData.safeEmails}
+              prefix={<SafetyOutlined />}
+              valueStyle={{ color: '#52c41a' }}
+            />
+            <Progress
+              percent={Math.round((dashboardData.safeEmails / dashboardData.totalEmails) * 100)}
+              size="small"
+              strokeColor="#52c41a"
+              showInfo={false}
             />
           </Card>
         </Col>
         
-        <Col xs={24} lg={12}>
-          <Card size="small" title="Top 10 Domain">
-            <Column
-              data={analyticsData.topDomains}
-              xField="domain"
-              yField="count"
-              color="#1890ff"
-              label={{
-                position: 'middle',
-                style: {
-                  fill: '#FFFFFF',
-                  opacity: 0.8,
-                },
-              }}
-              meta={{
-                domain: {
-                  alias: 'Domain',
-                },
-                count: {
-                  alias: 'Số lượng',
-                },
-              }}
-              height={300}
+        <Col xs={24} sm={12} lg={6}>
+          <Card className="stat-card">
+            <Statistic
+              title="Mối đe dọa"
+              value={dashboardData.phishingEmails + dashboardData.spamEmails + dashboardData.suspiciousEmails}
+              prefix={<ExclamationCircleOutlined />}
+              valueStyle={{ color: '#f5222d' }}
             />
+            <Space>
+              <Tag color="volcano">Phishing: {dashboardData.phishingEmails}</Tag>
+              <Tag color="red">Spam: {dashboardData.spamEmails}</Tag>
+              <Tag color="orange">Nghi ngờ: {dashboardData.suspiciousEmails}</Tag>
+            </Space>
           </Card>
         </Col>
         
-        <Col xs={24} lg={12}>
-          <Card size="small" title="Xu hướng Theo Thời gian">
-            <Line
-              data={analyticsData.timeSeriesData}
-              xField="date"
-              yField="count"
-              seriesField="type"
-              color={['#52c41a', '#f5222d']}
-              point={{
-                size: 5,
-                shape: 'diamond',
-              }}
-              label={{
-                style: {
-                  fill: '#aaa',
-                },
-              }}
-              height={300}
+        <Col xs={24} sm={12} lg={6}>
+          <Card className="stat-card">
+            <Statistic
+              title="Độ chính xác"
+              value={dashboardData.accuracy}
+              prefix={<TrophyOutlined />}
+              suffix="%"
+              precision={1}
+              valueStyle={{ color: '#722ed1' }}
             />
-          </Card>
-        </Col>
-
-        <Col xs={24} lg={12}>
-          <Card size="small" title="Phân bố Điểm Rủi ro">
-            <Column
-              data={analyticsData.riskDistribution}
-              xField="range"
-              yField="count"
-              color={({ range }) => {
-                const item = analyticsData.riskDistribution.find(d => d.range === range);
-                return item ? item.color : '#1890ff';
-              }}
-              label={{
-                position: 'middle',
-                style: {
-                  fill: '#FFFFFF',
-                  opacity: 0.9,
-                  fontWeight: 'bold',
-                  fontSize: 12,
-                },
-              }}
-              height={300}
-              meta={{
-                range: {
-                  alias: 'Mức độ rủi ro',
-                },
-                count: {
-                  alias: 'Số lượng',
-                },
-              }}
-            />
+            <div style={{ marginTop: 8 }}>
+              <Text type="secondary">
+                Phân tích: {analyticsPagination.total.toLocaleString()} emails
+              </Text>
+            </div>
           </Card>
         </Col>
       </Row>
-    </Card>
-  );
+    );
+  };
+
+  const renderThreatAnalysis = () => {
+    if (analyticsLoading) {
+      return (
+        <Card title="Phân tích Mối đe dọa" bordered={false}>
+          <Row gutter={[24, 24]}>
+            {[1, 2, 3, 4].map(index => (
+              <Col xs={24} lg={12} key={index}>
+                <Card size="small" loading={true}>
+                  <div style={{ height: '300px' }}></div>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        </Card>
+      );
+    }
+
+    return (
+      <Card title="Phân tích Mối đe dọa" bordered={false}>
+        <Row gutter={[24, 24]}>
+          <Col xs={24} lg={12}>
+            <Card size="small" title="Phân loại Email">
+              <Pie
+                data={analyticsData.categoryStats}
+                angleField="count"
+                colorField="category"
+                radius={0.8}
+                label={{
+                  type: 'outer',
+                  content: '{name}: {percentage}%',
+                }}
+                interactions={[{ type: 'element-active' }]}
+                color={['#52c41a', '#faad14', '#fa8c16', '#f5222d']}
+                height={300}
+              />
+            </Card>
+          </Col>
+          
+          <Col xs={24} lg={12}>
+            <Card size="small" title="Top 10 Domain">
+              <Column
+                data={analyticsData.topDomains}
+                xField="domain"
+                yField="count"
+                color="#1890ff"
+                label={{
+                  position: 'middle',
+                  style: {
+                    fill: '#FFFFFF',
+                    opacity: 0.8,
+                  },
+                }}
+                meta={{
+                  domain: {
+                    alias: 'Domain',
+                  },
+                  count: {
+                    alias: 'Số lượng',
+                  },
+                }}
+                height={300}
+              />
+            </Card>
+          </Col>
+          
+          <Col xs={24} lg={12}>
+            <Card size="small" title="Xu hướng Theo Thời gian">
+              <Line
+                data={analyticsData.timeSeriesData}
+                xField="date"
+                yField="count"
+                seriesField="type"
+                color={['#52c41a', '#f5222d']}
+                point={{
+                  size: 5,
+                  shape: 'diamond',
+                }}
+                label={{
+                  style: {
+                    fill: '#aaa',
+                  },
+                }}
+                height={300}
+              />
+            </Card>
+          </Col>
+
+          <Col xs={24} lg={12}>
+            <Card size="small" title="Phân bố Điểm Rủi ro">
+              <Column
+                data={analyticsData.riskDistribution}
+                xField="range"
+                yField="count"
+                color={({ range }) => {
+                  const item = analyticsData.riskDistribution.find(d => d.range === range);
+                  return item ? item.color : '#1890ff';
+                }}
+                label={{
+                  position: 'middle',
+                  style: {
+                    fill: '#FFFFFF',
+                    opacity: 0.9,
+                    fontWeight: 'bold',
+                    fontSize: 12,
+                  },
+                }}
+                height={300}
+                meta={{
+                  range: {
+                    alias: 'Mức độ rủi ro',
+                  },
+                  count: {
+                    alias: 'Số lượng',
+                  },
+                }}
+              />
+            </Card>
+          </Col>
+        </Row>
+      </Card>
+    );
+  };
 
   // New analytics dashboard
   const renderAnalyticsDashboard = () => (
@@ -867,7 +906,7 @@ const BusinessPage = () => {
               <Button 
                 icon={<ReloadOutlined />} 
                 onClick={refreshAnalyticsData}
-                loading={loading}
+                loading={analyticsLoading}
                 size="small"
               >
                 Làm mới
@@ -876,7 +915,7 @@ const BusinessPage = () => {
                 <Button 
                   type="primary" 
                   onClick={loadMoreAnalyticsData}
-                  loading={loading}
+                  loading={analyticsLoading}
                   size="small"
                 >
                   Tải thêm ({Math.min(1000, analyticsPagination.total - rawAnalyticsData.length)})
@@ -887,7 +926,7 @@ const BusinessPage = () => {
         </Row>
       </Card>
 
-      {loading ? (
+      {analyticsLoading ? (
         <Card style={{ textAlign: 'center', padding: '60px 0' }}>
           <Spin size="large" />
           <div style={{ marginTop: 16 }}>
@@ -1038,10 +1077,19 @@ const BusinessPage = () => {
       
         <Tabs defaultActiveKey="overview" size="large">
           <TabPane tab={<span><DashboardOutlined />Tổng quan</span>} key="overview">
-            <Space direction="vertical" size="large" style={{ width: '100%' }}>
-              {renderOverviewCards()}
-              {renderThreatAnalysis()}
-            </Space>
+            {analyticsLoading && rawAnalyticsData.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '80px 0' }}>
+                <Spin size="large" />
+                <div style={{ marginTop: 16 }}>
+                  <Text>Đang tải dữ liệu tổng quan...</Text>
+                </div>
+              </div>
+            ) : (
+              <Space direction="vertical" size="large" style={{ width: '100%' }}>
+                {renderOverviewCards()}
+                {renderThreatAnalysis()}
+              </Space>
+            )}
           </TabPane>
 
           <TabPane tab={<span><BarChartOutlined />Phân tích</span>} key="analytics">
@@ -1072,18 +1120,7 @@ const BusinessPage = () => {
                     onChange={(e) => setFilters(prev => ({ ...prev, to_email: e.target.value }))}
                     style={{ width: 200 }}
                   />
-                  <Select
-                    placeholder="Lọc theo phân loại"
-                    value={filters.category}
-                    onChange={(value) => setFilters(prev => ({ ...prev, category: value }))}
-                    style={{ width: 180 }}
-                    allowClear
-                  >
-                    <Option value="An toàn">An toàn</Option>
-                    <Option value="Nghi ngờ">Nghi ngờ</Option>
-                    <Option value="Spam">Spam</Option>
-                    <Option value="Giả mạo">Giả mạo</Option>
-                  </Select>
+            
                   <Button 
                     type="primary" 
                     icon={<SearchOutlined />} 
@@ -1095,6 +1132,14 @@ const BusinessPage = () => {
                     setFilters({ title: '', from_email: '', to_email: '', category: '' });
                     setPagination(prev => ({ ...prev, pageIndex: 1 }));
                     setSort({ column: 'received_time', order: 'descend' });
+                    // Trigger search after clearing filters
+                    setTimeout(() => {
+                      fetchEmails(
+                        { ...pagination, pageIndex: 1 },
+                        { title: '', from_email: '', to_email: '', category: '' },
+                        { column: 'received_time', order: 'descend' }
+                      );
+                    }, 0);
                   }}>
                     Xóa bộ lọc
                   </Button>
