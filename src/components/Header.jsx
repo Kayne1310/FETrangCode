@@ -77,14 +77,7 @@ const Header = () => {
           className="nav-menu"
         />
         
-        <Space className="header-actions">
-          <Button type="primary" ghost>
-            Đăng nhập
-          </Button>
-          <Button type="primary">
-            Đăng ký
-          </Button>
-        </Space>
+     
       </div>
     </AntHeader>
   );
