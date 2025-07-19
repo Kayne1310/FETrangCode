@@ -4,7 +4,7 @@
     line-height: 1.6;
     color: #333;
     overflow-x: hidden;
-    padding-top: 80px; /* Header height (64px) + spacing (16px) */
+
     min-height: 100vh;
 }
 
