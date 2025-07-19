@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Row, Col, Card, Typography, Input, Button, Select, 
   Alert, Spin, Result, Progress, Tag, Space, Divider, 

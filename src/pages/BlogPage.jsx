@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Row, Col, Card, Typography, Input, Button, Select, Tag, Space, 
   List, Avatar, Divider, Breadcrumb, Pagination, Affix, Anchor
@@ -306,6 +306,10 @@ const BlogPage = () => {
   const handleBackToList = () => {
     setSelectedPost(null);
   };
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [selectedPost]);
 
   if (selectedPost) {
     return (

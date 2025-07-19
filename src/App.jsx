@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Layout, ConfigProvider } from 'antd';
 import viVN from 'antd/locale/vi_VN';
@@ -15,12 +15,14 @@ import './styles/App.css';
 const { Content } = Layout;
 
 function App() {
+  const contentRef = useRef(null);
+
   return (
     <ConfigProvider locale={viVN}>
       <Router>
         <Layout className="app-layout">
-          <Header />
-          <Content>
+          <Header contentRef={contentRef} />
+          <Content ref={contentRef}>
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/check" element={<CheckPage />} />
