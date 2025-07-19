@@ -409,9 +409,9 @@ const BusinessPage = () => {
   );
 
   return (
-    <div className="business-page" style={{ paddingTop: '100px', minHeight: '100vh' }}>
+    <div className="business-page" style={{ paddingTop: '80px' }}>
       <div className="container" style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px' }}>
-        <div className="page-header" style={{ marginBottom: '32px' }}>
+        <div className="page-header" style={{ marginBottom: '24px' }}>
           <Row justify="space-between" align="middle">
             <Col>
               <Title level={1} className="page-title" style={{ marginBottom: '8px' }}>

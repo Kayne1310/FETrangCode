@@ -1,4 +1,4 @@
-import { createServiceClient } from '../config/axiosConfig'
+import { apiClient, createServiceClient } from '../config/axiosConfig'
 
 // ============================================
 // Sử dụng createServiceClient
