@@ -1280,6 +1280,98 @@ html, body {
   font-weight: 700 !important;
 }
 
+/* Business Page Responsive Improvements */
+.business-page {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.business-page .page-header {
+  margin-bottom: clamp(24px, 4vw, 40px);
+}
+
+.business-page .page-title {
+  font-size: clamp(1.5rem, 5vw, 2.5rem) !important;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.business-page .page-description {
+  font-size: clamp(0.9rem, 3vw, 1.2rem);
+  margin-bottom: 16px !important;
+}
+
+/* Tabs Responsive */
+.business-page .ant-tabs {
+  width: 100%;
+  overflow: hidden;
+}
+
+.business-page .ant-tabs-nav {
+  margin-bottom: 16px;
+}
+
+.business-page .ant-tabs-tab {
+  font-size: clamp(0.85rem, 2.5vw, 1rem) !important;
+  padding: 8px 12px !important;
+}
+
+.business-page .ant-tabs-tab-btn {
+  font-weight: 600;
+}
+
+/* Overview Cards Responsive */
+.business-page .stat-card .ant-card-body {
+  padding: clamp(16px, 4vw, 24px);
+}
+
+.business-page .stat-card .ant-statistic {
+  text-align: center;
+}
+
+.business-page .stat-card .ant-statistic-title {
+  font-size: clamp(0.8rem, 2.2vw, 1rem) !important;
+}
+
+.business-page .stat-card .ant-statistic-content {
+  margin-top: 8px;
+}
+
+.business-page .stat-card .ant-progress {
+  margin-top: 12px;
+}
+
+/* Data Status Bar Responsive */
+.business-page .ant-card.ant-card-small {
+  margin-bottom: 16px;
+}
+
+.business-page .ant-card.ant-card-small .ant-card-body {
+  padding: 12px 16px;
+}
+
+/* Analytics Cards Responsive */
+.business-page .ant-row[gutter] {
+  margin-left: -8px;
+  margin-right: -8px;
+}
+
+.business-page .ant-row[gutter] > .ant-col {
+  padding-left: 8px;
+  padding-right: 8px;
+  margin-bottom: 16px;
+}
+
+/* Charts Container */
+.business-page .ant-card .ant-card-head-title {
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+}
+
+.business-page .ant-card .ant-card-body {
+  padding: clamp(12px, 3vw, 24px);
+}
+
 /* Business Page Table Improvements */
 .business-page .ant-table {
   font-size: 12px;
@@ -1346,8 +1438,138 @@ html, body {
   overflow-y: hidden;
 }
 
-/* Fix column widths on mobile */
+/* Business Page Mobile Specific Styles */
 @media (max-width: 768px) {
+  .business-page {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  
+  .business-page .container {
+    padding: 0 8px;
+  }
+  
+  .business-page .page-header .ant-row {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  .business-page .page-header .ant-col {
+    width: 100% !important;
+  }
+  
+  .business-page .page-header .ant-space {
+    justify-content: center;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  
+  .business-page .page-header .ant-btn {
+    font-size: 12px;
+    padding: 4px 8px;
+    height: 32px;
+  }
+  
+  .business-page .page-header .ant-switch {
+    min-width: 44px;
+  }
+  
+  /* Tabs Mobile */
+  .business-page .ant-tabs-nav-wrap {
+    padding: 0 4px;
+  }
+  
+  .business-page .ant-tabs-tab {
+    font-size: 13px !important;
+    padding: 6px 8px !important;
+    margin: 0 2px !important;
+  }
+  
+  .business-page .ant-tabs-tab .anticon {
+    font-size: 14px;
+    margin-right: 4px;
+  }
+  
+  /* Overview Cards Mobile */
+  .business-page .ant-row[gutter] {
+    margin-left: -4px;
+    margin-right: -4px;
+  }
+  
+  .business-page .ant-row[gutter] > .ant-col {
+    padding-left: 4px;
+    padding-right: 4px;
+    margin-bottom: 12px;
+  }
+  
+  .business-page .stat-card .ant-card-body {
+    padding: 12px;
+  }
+  
+  .business-page .stat-card .ant-statistic-title {
+    font-size: 12px !important;
+    margin-bottom: 6px !important;
+  }
+  
+  .business-page .stat-card .ant-statistic-content-value {
+    font-size: 18px !important;
+  }
+  
+  .business-page .stat-card .ant-space {
+    flex-wrap: wrap;
+    gap: 4px !important;
+  }
+  
+  .business-page .stat-card .ant-tag {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+  
+  /* Data Status Bar Mobile */
+  .business-page .ant-card.ant-card-small .ant-card-body {
+    padding: 8px 12px;
+  }
+  
+  .business-page .ant-card.ant-card-small .ant-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .business-page .ant-card.ant-card-small .ant-space {
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+  
+  .business-page .ant-card.ant-card-small .ant-input {
+    width: 60px !important;
+  }
+  
+  .business-page .ant-card.ant-card-small .ant-btn {
+    font-size: 11px;
+    padding: 2px 8px;
+    height: 28px;
+  }
+  
+  /* Analytics Charts Mobile */
+  .business-page .ant-card .ant-card-head {
+    padding: 12px 16px;
+  }
+  
+  .business-page .ant-card .ant-card-head-title {
+    font-size: 14px;
+  }
+  
+  .business-page .ant-card .ant-card-body {
+    padding: 12px;
+  }
+  
+  /* Email Logs Mobile */
+  .business-page .ant-card .ant-card-extra {
+    display: none; /* Hide search filters on mobile */
+  }
+  
   .business-page .ant-table-thead > tr > th,
   .business-page .ant-table-tbody > tr > td {
     padding: 6px 8px;
@@ -1362,6 +1584,118 @@ html, body {
   
   .business-page .ant-progress-text {
     font-size: 10px !important;
+  }
+  
+  .business-page .ant-table-pagination {
+    padding: 12px 8px;
+  }
+  
+  .business-page .ant-table-pagination .ant-pagination-item {
+    margin-right: 4px;
+    min-width: 28px;
+    height: 28px;
+    line-height: 26px;
+  }
+  
+  .business-page .ant-table-pagination .ant-pagination-item a {
+    font-size: 12px;
+  }
+  
+  /* Reports Section Mobile */
+  .business-page .ant-list-item {
+    padding: 12px 0;
+  }
+  
+  .business-page .ant-list-item-meta-title {
+    font-size: 13px;
+  }
+  
+  .business-page .ant-list-item-meta-description {
+    font-size: 11px;
+  }
+  
+  .business-page .ant-list-item-action {
+    margin-left: 8px;
+  }
+  
+  .business-page .ant-list-item-action .ant-btn {
+    font-size: 11px;
+    padding: 2px 8px;
+    height: 24px;
+  }
+  
+  /* Form Mobile */
+  .business-page .ant-form-item {
+    margin-bottom: 16px;
+  }
+  
+  .business-page .ant-form-item-label {
+    font-size: 13px;
+  }
+  
+  .business-page .ant-input,
+  .business-page .ant-select-selector {
+    font-size: 13px;
+    min-height: 36px;
+  }
+}
+
+@media (max-width: 480px) {
+  .business-page .page-title {
+    font-size: 20px !important;
+    flex-direction: column;
+    text-align: center;
+    gap: 4px;
+  }
+  
+  .business-page .page-description {
+    font-size: 13px;
+    text-align: center;
+  }
+  
+  .business-page .ant-tabs-tab {
+    font-size: 11px !important;
+    padding: 4px 6px !important;
+  }
+  
+  .business-page .ant-tabs-tab-btn span {
+    display: none; /* Hide text, keep only icons on very small screens */
+  }
+  
+  .business-page .stat-card .ant-statistic-content-value {
+    font-size: 16px !important;
+  }
+  
+  .business-page .stat-card .ant-tag {
+    font-size: 9px;
+    padding: 1px 4px;
+  }
+  
+  .business-page .ant-table {
+    font-size: 10px;
+  }
+  
+  .business-page .ant-table-thead > tr > th,
+  .business-page .ant-table-tbody > tr > td {
+    padding: 4px 6px;
+    font-size: 10px;
+  }
+  
+  /* Very small charts */
+  .business-page .ant-card .ant-card-body {
+    padding: 8px;
+  }
+}
+
+/* Special responsive for Analytics Dashboard */
+@media (max-width: 1199px) {
+  .business-page .ant-col-lg-16 {
+    width: 100% !important;
+    margin-bottom: 16px;
+  }
+  
+  .business-page .ant-col-lg-8 {
+    width: 100% !important;
   }
 }
 
@@ -1400,6 +1734,24 @@ html, body {
   color: #1890ff;
 }
 
+/* Hero Post Card Responsive */
+.blog-page .hero-post-card {
+  border-radius: 20px;
+  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.3);
+  overflow: hidden;
+  margin-bottom: clamp(24px, 4vw, 32px);
+}
+
+.blog-page .hero-post-card .ant-card-body {
+  padding: clamp(20px, 4vw, 40px);
+}
+
+.blog-page .hero-post-card .ant-typography h2 {
+  line-height: 1.3;
+  margin-bottom: 16px !important;
+}
+
+/* Blog Post Detail Responsive */
 .blog-post-detail {
   border-radius: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -1464,15 +1816,22 @@ html, body {
   padding: 0 clamp(24px, 4vw, 40px) clamp(24px, 4vw, 40px) clamp(24px, 4vw, 40px);
 }
 
+/* Search Filters Responsive */
 .search-filters {
   background: linear-gradient(145deg, #f8f9ff, #ffffff);
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: clamp(16px, 3vw, 24px);
+}
+
+.search-filters .ant-card-body {
+  padding: clamp(16px, 3vw, 24px);
 }
 
 .search-filters .ant-input-affix-wrapper {
   border-radius: 8px;
   border: 2px solid #e8e8e8;
+  height: clamp(40px, 6vw, 48px);
 }
 
 .search-filters .ant-input-affix-wrapper:focus,
@@ -1484,12 +1843,429 @@ html, body {
 .search-filters .ant-select-selector {
   border-radius: 8px !important;
   border: 2px solid #e8e8e8 !important;
-  height: 40px !important;
+  height: clamp(40px, 6vw, 48px) !important;
 }
 
 .search-filters .ant-select-focused .ant-select-selector {
   border-color: #1890ff !important;
   box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+/* BlogPage Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .blog-page {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  
+  .blog-page .container {
+    padding: 0 12px;
+  }
+  
+  .blog-page .page-header {
+    margin-bottom: 24px;
+    text-align: center;
+  }
+  
+  .blog-page .page-title {
+    font-size: 24px !important;
+    margin-bottom: 12px !important;
+  }
+  
+  .blog-page .page-description {
+    font-size: 14px;
+    margin-bottom: 16px !important;
+  }
+  
+  /* Hero Post Card Mobile */
+  .blog-page .hero-post-card {
+    margin-bottom: 20px;
+  }
+  
+  .blog-page .hero-post-card .ant-card-body {
+    padding: 16px;
+  }
+  
+  .blog-page .hero-post-card .ant-row {
+    flex-direction: column-reverse;
+  }
+  
+  .blog-page .hero-post-card h2 {
+    font-size: 18px !important;
+    line-height: 1.4;
+    margin-bottom: 12px !important;
+  }
+  
+  .blog-page .hero-post-card .ant-typography {
+    font-size: 13px;
+    margin-bottom: 16px !important;
+  }
+  
+  .blog-page .hero-post-card .ant-space {
+    flex-wrap: wrap;
+    gap: 8px 12px !important;
+  }
+  
+  .blog-page .hero-post-card .ant-space-item {
+    font-size: 12px;
+  }
+  
+  .blog-page .hero-post-card img {
+    height: 180px !important;
+    margin-bottom: 16px;
+  }
+  
+  .blog-page .hero-post-card .ant-btn {
+    width: 100%;
+    height: 44px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  
+  /* Search Filters Mobile */
+  .blog-page .search-filters .ant-card-body {
+    padding: 16px;
+  }
+  
+  .blog-page .search-filters .ant-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .blog-page .search-filters .ant-col {
+    width: 100% !important;
+  }
+  
+  .blog-page .search-filters .ant-input-affix-wrapper {
+    height: 44px;
+    font-size: 14px;
+  }
+  
+  .blog-page .search-filters .ant-select-selector {
+    height: 44px !important;
+    font-size: 14px;
+  }
+  
+  .blog-page .search-filters .ant-space {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 8px !important;
+    justify-content: center;
+  }
+  
+  .blog-page .search-filters .ant-btn {
+    font-size: 12px;
+    padding: 4px 12px;
+    height: 32px;
+  }
+  
+  /* Blog Posts Grid Mobile */
+  .blog-page .blog-post-card .ant-card-body {
+    padding: 16px;
+  }
+  
+  .blog-page .blog-post-card .ant-row {
+    flex-direction: column;
+  }
+  
+  .blog-page .blog-post-card .post-image {
+    width: 100%;
+    margin-bottom: 12px;
+  }
+  
+  .blog-page .blog-post-card .post-image img {
+    height: 180px;
+  }
+  
+  .blog-page .blog-post-card .ant-typography h4 {
+    font-size: 16px;
+    line-height: 1.4;
+    margin-bottom: 8px !important;
+  }
+  
+  .blog-page .blog-post-card .ant-typography div {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  
+  .blog-page .blog-post-card .ant-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+  }
+  
+  .blog-page .blog-post-card .ant-space {
+    flex-wrap: wrap;
+    gap: 8px !important;
+  }
+  
+  .blog-page .blog-post-card .ant-space-item {
+    font-size: 11px;
+  }
+  
+  .blog-page .blog-post-card .ant-btn-link {
+    font-size: 12px;
+    padding: 2px 8px;
+  }
+  
+  /* Sidebar Mobile */
+  .blog-page .ant-col-lg-6 {
+    margin-top: 24px;
+  }
+  
+  .blog-page .ant-card.ant-card-small {
+    margin-bottom: 16px;
+  }
+  
+  .blog-page .ant-card.ant-card-small .ant-card-head {
+    padding: 12px 16px;
+  }
+  
+  .blog-page .ant-card.ant-card-small .ant-card-head-title {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  
+  .blog-page .ant-card.ant-card-small .ant-card-body {
+    padding: 12px 16px;
+  }
+  
+  .blog-page .ant-list-item {
+    padding: 8px 0 !important;
+  }
+  
+  .blog-page .ant-list-item-meta-title {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  
+  .blog-page .ant-list-item-meta-description {
+    font-size: 11px;
+  }
+  
+  .blog-page .ant-avatar {
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 11px;
+  }
+  
+  /* Tags Mobile */
+  .blog-page .ant-tag {
+    margin: 2px 4px 2px 0;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 8px;
+  }
+  
+  /* Pagination Mobile */
+  .blog-page .ant-pagination {
+    text-align: center;
+    margin-top: 24px;
+  }
+  
+  .blog-page .ant-pagination-item {
+    min-width: 32px;
+    height: 32px;
+    line-height: 30px;
+    margin-right: 4px;
+  }
+  
+  .blog-page .ant-pagination-item a {
+    font-size: 14px;
+  }
+  
+  .blog-page .ant-pagination-total-text {
+    font-size: 12px;
+  }
+  
+  /* Blog Post Detail Mobile */
+  .blog-page .blog-post-detail .post-header {
+    padding: 16px;
+  }
+  
+  .blog-page .blog-post-detail .post-header h1 {
+    font-size: 20px !important;
+    line-height: 1.4;
+    margin-bottom: 12px !important;
+  }
+  
+  .blog-page .blog-post-detail .post-header .ant-space {
+    flex-wrap: wrap;
+    gap: 8px 12px !important;
+  }
+  
+  .blog-page .blog-post-detail .post-header .ant-space-item {
+    font-size: 12px;
+  }
+  
+  .blog-page .blog-post-detail .post-image {
+    margin: 16px 0;
+  }
+  
+  .blog-page .blog-post-detail .post-image img {
+    height: 200px !important;
+  }
+  
+  .blog-page .blog-post-detail .post-content {
+    padding: 0 16px;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  
+  .blog-page .blog-post-detail .post-content h2 {
+    font-size: 18px;
+    margin: 24px 0 12px 0;
+  }
+  
+  .blog-page .blog-post-detail .post-content h3 {
+    font-size: 16px;
+    margin: 16px 0 8px 0;
+  }
+  
+  .blog-page .blog-post-detail .post-content p {
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+  
+  .blog-page .blog-post-detail .post-content ul,
+  .blog-page .blog-post-detail .post-content ol {
+    margin: 12px 0;
+    padding-left: 20px;
+  }
+  
+  .blog-page .blog-post-detail .post-footer {
+    padding: 16px;
+  }
+  
+  .blog-page .blog-post-detail .post-footer .ant-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .blog-page .blog-post-detail .post-footer .ant-space {
+    flex-wrap: wrap;
+    gap: 8px !important;
+    justify-content: center;
+  }
+  
+  .blog-page .blog-post-detail .post-footer .ant-tag {
+    font-size: 11px;
+    margin: 2px;
+  }
+  
+  .blog-page .blog-post-detail .post-footer .ant-btn {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  
+  /* Breadcrumb Mobile */
+  .blog-page .ant-breadcrumb {
+    margin-bottom: 16px !important;
+    font-size: 12px;
+  }
+  
+  .blog-page .ant-breadcrumb-link {
+    font-size: 12px;
+  }
+  
+  /* Sidebar Detail Page Mobile */
+  .blog-page .ant-col-lg-6 [style*="position: sticky"] {
+    position: relative !important;
+    top: 0 !important;
+  }
+  
+  .blog-page .ant-col-lg-6 .ant-btn {
+    margin-bottom: 16px;
+    height: 44px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+}
+
+@media (max-width: 480px) {
+  .blog-page .page-title {
+    font-size: 20px !important;
+    text-align: center;
+  }
+  
+  .blog-page .page-description {
+    font-size: 13px;
+    text-align: center;
+  }
+  
+  /* Ultra compact hero for very small screens */
+  .blog-page .hero-post-card h2 {
+    font-size: 16px !important;
+  }
+  
+  .blog-page .hero-post-card .ant-typography {
+    font-size: 12px;
+  }
+  
+  .blog-page .hero-post-card .ant-space-item {
+    font-size: 11px;
+  }
+  
+  .blog-page .hero-post-card img {
+    height: 160px !important;
+  }
+  
+  /* Very compact blog cards */
+  .blog-page .blog-post-card .ant-card-body {
+    padding: 12px;
+  }
+  
+  .blog-page .blog-post-card .post-image img {
+    height: 160px;
+  }
+  
+  .blog-page .blog-post-card .ant-typography h4 {
+    font-size: 15px;
+  }
+  
+  /* Compact sidebar */
+  .blog-page .ant-card.ant-card-small .ant-card-body {
+    padding: 12px;
+  }
+  
+  .blog-page .ant-list-item-meta-title {
+    font-size: 11px;
+  }
+  
+  .blog-page .ant-list-item-meta-description {
+    font-size: 10px;
+  }
+  
+  /* Compact blog detail */
+  .blog-page .blog-post-detail .post-header h1 {
+    font-size: 18px !important;
+  }
+  
+  .blog-page .blog-post-detail .post-content {
+    font-size: 13px;
+  }
+  
+  .blog-page .blog-post-detail .post-content h2 {
+    font-size: 16px;
+  }
+  
+  .blog-page .blog-post-detail .post-content h3 {
+    font-size: 14px;
+  }
+}
+
+/* Fix for mobile landscape */
+@media (max-width: 768px) and (orientation: landscape) {
+  .blog-page .hero-post-card img {
+    height: 140px !important;
+  }
+  
+  .blog-page .blog-post-card .post-image img {
+    height: 120px !important;
+  }
+  
+  .blog-page .blog-post-detail .post-image img {
+    height: 160px !important;
+  }
 }
 
 /* Sidebar Styles */

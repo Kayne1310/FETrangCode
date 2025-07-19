@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Form, 
   Input, 
@@ -31,33 +31,12 @@ const AICheck = () => {
   const [resultModal, setResultModal] = useState(false);
   const [checkResult, setCheckResult] = useState(null);
 
-  // Hàm kiểm tra xem có ít nhất 1 field được nhập
-  const hasAtLeastOneField = (values) => {
-    return values.title || values.content || values.fromEmail || values.toEmail;
-  };
-
   // Hàm xử lý khi submit form
   const handleSubmit = async (values) => {
-    // Kiểm tra ít nhất 1 field được nhập
-    if (!hasAtLeastOneField(values)) {
-      Modal.warning({
-        title: 'Thiếu thông tin',
-        content: 'Vui lòng nhập ít nhất một trong bốn trường: Tiêu đề, Nội dung, Email người gửi, hoặc Email người nhận.'
-      });
-      return;
-    }
-    
     setLoading(true);
     
     try {
-      // Lọc chỉ các field có dữ liệu
-      const emailData = {};
-      if (values.title) emailData.title = values.title;
-      if (values.content) emailData.content = values.content;
-      if (values.fromEmail) emailData.fromEmail = values.fromEmail;
-      if (values.toEmail) emailData.toEmail = values.toEmail;
-      
-      const result = await AIcheckService.checkEmail(emailData);
+      const result = await AIcheckService.checkEmail(values);
       
       if (result.success) {
         setCheckResult(result.data);
@@ -141,10 +120,14 @@ const AICheck = () => {
               <Form.Item
                 label="Tiêu đề Email"
                 name="title"
+                rules={[
+                  { required: true, message: 'Vui lòng nhập tiêu đề email!' },
+                  { whitespace: true, message: 'Tiêu đề email không thể chỉ chứa khoảng trắng!' }
+                ]}
               >
                 <Input 
                   prefix={<MailOutlined />}
-                  placeholder="Nhập tiêu đề email cần kiểm tra (tùy chọn)"
+                  placeholder="Nhập tiêu đề email cần kiểm tra"
                 />
               </Form.Item>
             </Col>
@@ -155,22 +138,26 @@ const AICheck = () => {
               <Form.Item
                 label="Email Người Gửi"
                 name="fromEmail"
-                // rules={[
-                //   { type: 'email', message: 'Email không đúng định dạng!' }
-                // ]}
+                rules={[
+                  { required: true, message: 'Vui lòng nhập email người gửi!' },
+                  { type: 'email', message: 'Email không đúng định dạng!' },
+                  { whitespace: true, message: 'Email không thể chỉ chứa khoảng trắng!' }
+                ]}
               >
-                <Input placeholder="nguoigui@example.com (tùy chọn)" />
+                <Input placeholder="nguoigui@example.com" />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
                 label="Email Người Nhận"
                 name="toEmail"
-                // rules={[
-                //   { type: 'email', message: 'Email không đúng định dạng!' }
-                // ]}
+                rules={[
+                  { required: true, message: 'Vui lòng nhập email người nhận!' },
+                  { type: 'email', message: 'Email không đúng định dạng!' },
+                  { whitespace: true, message: 'Email không thể chỉ chứa khoảng trắng!' }
+                ]}
               >
-                <Input placeholder="nguoinhan@example.com (tùy chọn)" />
+                <Input placeholder="nguoinhan@example.com" />
               </Form.Item>
             </Col>
           </Row>
@@ -178,10 +165,14 @@ const AICheck = () => {
           <Form.Item
             label="Nội dung Email"
             name="content"
+            rules={[
+              { required: true, message: 'Vui lòng nhập nội dung email!' },
+              { whitespace: true, message: 'Nội dung email không thể chỉ chứa khoảng trắng!' }
+            ]}
           >
             <TextArea
               rows={6}
-              placeholder="Dán nội dung email cần kiểm tra vào đây... (tùy chọn)"
+              placeholder="Dán nội dung email cần kiểm tra vào đây..."
               showCount
               maxLength={2000}
             />

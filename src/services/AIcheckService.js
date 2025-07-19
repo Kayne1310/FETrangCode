@@ -13,7 +13,7 @@ const geminiAPI = axios.create({
   }
 });
 
-// Regex patterns chặt chẽ để phát hiện các dấu hiệu nguy hiểm
+// Regex patterns chặt chẽ để phát hiện các dấu hiệu nguy hiểm - Tối ưu từ checkService.js
 const SECURITY_PATTERNS = {
   // Patterns cho GIẢ MẠO (Phishing/Fraud) - Độ nguy hiểm cao nhất
   FAKE_PATTERNS: {
@@ -29,13 +29,11 @@ const SECURITY_PATTERNS = {
       /\b(congratulations?|congrats).*(winner|won|selected)\b/i,
       /\byou.*(have.*)?(won|winning|winner).*(prize|money|lottery|million)\b/i,
       /\b(inheritance|estate).*(million|billion|\$|USD|€|£)\b/i,
-      /\b(prince|princess|heir|widow).*(nigeria|africa|fortune)\b/i,
       
       // Lừa đảo tài chính
       /\btransfer.*money.*(urgent|immediate|today)\b/i,
       /\b(bitcoin|crypto|cryptocurrency).*(investment|opportunity|profit)\b/i,
       /\bguaranteed.*(profit|return|income).*(100%|no.risk)\b/i,
-      /\bmake.*\$.*per.*(day|week|month).*(easy|simple|guaranteed)\b/i,
       
       // Tiếng Việt
       /\b(khẩn cấp|gấp|ngay lập tức).*(xác minh|kiểm tra).*(tài khoản|thông tin)\b/i,
@@ -45,24 +43,17 @@ const SECURITY_PATTERNS = {
     ],
     
     content: [
-      // Yêu cầu thông tin cá nhân
+      // Yêu cầu thông tin cá nhân - Tối ưu
       /\benter.*(password|pin|ssn|social.security).*(immediately|now|verify)\b/i,
       /\bprovide.*(credit.card|bank.account|personal.info).*(details|number)\b/i,
       /\baccount.*(will.be.*)?(closed|terminated|suspended).*(today|24.hours)\b/i,
       /\bconfirm.*(identity|account).*(clicking|visit|link)\b/i,
       
       // Dấu hiệu lừa đảo tài chính
-      /\bwestern.union.*transfer.*fee\b/i,
-      /\bbitcoin.*(wallet|address|payment).*(send|transfer)\b/i,
+      /\btransfer.*money.*(urgent|immediate|today)\b/i,
+      /\b(bitcoin|crypto|cryptocurrency).*(investment|opportunity|profit)\b/i,
+      /\bguaranteed.*(profit|return|income).*(100%|no.risk)\b/i,
       /\badvance.fee.*fraud\b/i,
-      /\bpay.*fee.*(first|upfront|advance).*receive.*money\b/i,
-      /\btax.*(clearance|certificate|code).*(fee|payment)\b/i,
-      
-      // Mạo danh tổ chức
-      /\birs.*tax.*(refund|owe|audit)\b/i,
-      /\bfbi.*investigation.*money\b/i,
-      /\bunited.nations.*compensation\b/i,
-      /\bworld.bank.*fund\b/i,
       
       // Yêu cầu hành động gấp
       /\b(respond|reply).*(within|before).*(24.*hours?|today|immediately)\b/i,
@@ -72,67 +63,37 @@ const SECURITY_PATTERNS = {
       /\bnhập.*(mật khẩu|pin|mã).*(xác minh|kiểm tra)\b/i,
       /\bcung cấp.*(số tài khoản|thông tin cá nhân|cmnd|cccd)\b/i,
       /\btài khoản.*sẽ.*bị.*(đóng|khóa).*trong.*24.*giờ\b/i,
-      /\bchuyển khoản.*(phí|lệ phí).*(trước|đầu tiên)\b/i,
       /\btrả lời.*trong.*(24.*giờ|hôm nay|ngay)\b/i
     ],
     
     fromEmail: [
-      // Domain miễn phí cực kỳ nguy hiểm (Phishing hotspots)
-      /^[^@]+@.*\.(tk|ml|ga|cf|gq|pw|xyz|top|click|online|site|website|info\.tm|uu\.gl)$/i,
-      /^[^@]+@.*\.(bid|win|download|stream|review|link|zip|work|men|loan|trade)$/i,
+      // Domain miễn phí nguy hiểm - Tối ưu
+      /\.(tk|ml|ga|cf|gq|pw|xyz|top|click|online|site|website)$/i,
+      /\.(bid|win|download|stream|review|link|zip|work|men|loan|trade)$/i,
       
-      // Temporary/Disposable email services
-      /^[^@]+@.*(temp|temporary|10minute|guerrillamail|mailinator|trashmail|throwaway|disposable|fake|dummy)\./i,
-      /^[^@]+@.*(yopmail|maildrop|sharklasers|guerrillamailblock|grr\.la|guerrillamail\.biz)$/i,
-      /^[^@]+@.*(tempail|getairmail|emailondeck|20minutemail|mailnesia|spamgourmet)$/i,
-      /^[^@]+@.*(dispostable|mohmal|mytrashmail|no-spam|spam4\.me|tempinbox|tempr)$/i,
+      // Temporary/Disposable email services - Đơn giản hóa
+      /(temp|temporary|10minute|guerrillamail|mailinator|trashmail|throwaway|disposable|fake|dummy)\./i,
+      /(yopmail|maildrop|sharklasers|guerrillamailblock|grr\.la)\./i,
       
-      // Email có cấu trúc bất thường và nghi ngờ
+      // Email có cấu trúc bất thường - Tối ưu
       /^[^@]*\d{6,}[^@]*@/i,  // 6+ số liên tiếp
-      /^[^@]*[0-9]{4,}[a-z]{0,2}\d*@/i,  // Pattern số + chữ ngắn + số
+      /^[^@]*\d{4,}[^@]*@/i, // Email có 4+ số liên tiếp
       /^[^@]*[_.-]{4,}[^@]*@/i,  // Quá nhiều dấu gạch/chấm
       /^[a-z]+\d{5,}@/i,  // Chữ + 5+ số
-      /^[^@]*random[^@]*\d+@/i,  // Có từ "random" + số
-      /^[^@]*test[^@]*\d*@/i,  // Có từ "test"
       
-      // Mạo danh tổ chức lớn (Typosquatting + Domain spoofing)
-      /^[^@]+@.*(paypal|amazon|google|microsoft|apple|facebook|twitter|linkedin|netflix|spotify|adobe|dropbox).*\.(tk|ml|ga|cf|gq|pw|xyz|top|click|online|site)$/i,
-      /^[^@]*(paypal|amazon|google|microsoft|apple|facebook|twitter|instagram|whatsapp|telegram)[^@]*@(?!.*(paypal|amazon|google|microsoft|apple|facebook|twitter|instagram|whatsapp|telegram)\.(com|net)$)/i,
-      /^[^@]*-?(payp4l|4mazon|g00gle|micr0soft|apple|faceb00k|twitt3r)-?[^@]*@/i,  // Leet speak
-      /^[^@]*(paipal|amazom|googIe|microsft|appIe|facebbok|twittr)[^@]*@/i,  // Typos phổ biến
+      // Mạo danh tổ chức lớn - Đơn giản hóa
+      /^[^@]*(paypal|amazon|google|microsoft|apple|facebook|twitter)[^@]*@(?!.*(paypal|amazon|google|microsoft|apple|facebook|twitter)\.(com|net)$)/i,
       
       // Admin/Support fake accounts
       /^(admin|support|security|help|service|noreply|no-reply|notification|alert)\d+@/i,
-      /^(admin|support|security|help|service)[-_]?(team|dept|center|office)\d*@/i,
-      /^(system|server|network|technical|it)[-_]?(admin|support|team)\d*@/i,
       
-      // Mạo danh ngân hàng và tổ chức tài chính
-      /^[^@]+@.*(bank|banking|finance|credit|loan|mortgage|investment).*\.(tk|ml|ga|cf|gq|pw|xyz|top)$/i,
-      /^[^@]*-?(visa|mastercard|amex|discover|chase|wellsfargo|bankofamerica|citibank)-?[^@]*@(?!.*(visa|mastercard|discover|chase|wellsfargo|bankofamerica|citibank)\.(com|net)$)/i,
-      
-      // Mạo danh chính phủ và tổ chức
-      /^[^@]+@.*(gov|official|government|federal|state|tax|irs|fbi|cia|police).*\.(tk|ml|ga|cf|gq|pw|xyz|top|com|net|org)$/i,
-      /^[^@]+@(?!.*\.gov$).*(government|federal|treasury|irs|homeland|justice|defense)\./i,
-      
-      // Pattern nguy hiểm khác
-      /^[^@]+@[^.]*\.(com|net|org)\.(tk|ml|ga|cf|gq)$/i,  // Double domain extension
-      /^[^@]+@.*\d+\.(tk|ml|ga|cf|gq|pw|xyz|top)$/i,  // Số trong subdomain + domain nguy hiểm
-      /^[^@]*[\u0400-\u04FF\u4e00-\u9fff\u0590-\u05FF\u0600-\u06FF][^@]*@/i, // Non-Latin scripts
-      /^[^@]*[A-Z]{5,}[^@]*@/i,  // Quá nhiều chữ hoa liên tiếp
+      // Pattern nguy hiểm khác - Tối ưu
       /^.{1,2}@/i,  // Username quá ngắn (1-2 ký tự)
       /^.{50,}@/i,  // Username quá dài (50+ ký tự)
-      
-      // Cryptocurrency/Investment scam patterns
-      /^[^@]*(bitcoin|crypto|blockchain|ethereum|trading|forex|invest|profit|earning|mining)[^@]*\d*@/i,
-      /^[^@]*(wallet|exchange|trader|investor|btc|eth|usdt)[^@]*@/i,
-      
-      // Dating/Romance scam patterns
-      /^[^@]*(love|heart|romance|dating|single|sexy|beautiful|handsome)[^@]*\d*@/i,
-      /^[^@]*(widow|widower|soldier|doctor|engineer|businessman)[^@]*\d+@/i
     ]
   },
 
-  // Patterns cho SPAM - Mức độ trung bình
+  // Patterns cho SPAM - Mức độ trung bình - Tối ưu từ checkService.js
   SPAM_PATTERNS: {
     title: [
       /\bbuy.*(now|today).*(discount|sale|\d+%.*off)\b/i,
@@ -144,9 +105,6 @@ const SECURITY_PATTERNS = {
       /\b(viagra|cialis|pharmacy|medication).*(cheap|discount|online)\b/i,
       /\bcasino.*(bonus|free.*spins|jackpot)\b/i,
       /\blottery.*(winner|jackpot|million)\b/i,
-      /\bget.*rich.*(quick|fast|scheme)\b/i,
-      /\bmlm|multi.*level.*marketing\b/i,
-      /\b(forex|binary.*options|crypto).*trading.*profit\b/i,
       
       // Tiếng Việt
       /\bmua.*ngay.*(giảm giá|khuyến mãi|\d+%)\b/i,
@@ -161,61 +119,39 @@ const SECURITY_PATTERNS = {
       /\blimited.*(stock|quantity|time).*hurry\b/i,
       /\bact.*now.*offer.*expires\b/i,
       /\bspecial.*promotion.*today.*only\b/i,
-      /\bexclusive.*deal.*vip.*members\b/i,
       /\bmulti.*level.*marketing.*opportunity\b/i,
-      /\bpyramid.*scheme.*investment\b/i,
       /\bforex.*trading.*signals.*profit\b/i,
-      /\bbinary.*options.*strategy\b/i,
-      /\baffiliate.*marketing.*commission\b/i,
-      /\bdrop.*shipping.*business\b/i,
       /\bsupplement.*(miracle|breakthrough|secret)\b/i,
-      
-      // Pattern email marketing
-      /\bif.*you.*no.*longer.*wish.*receive\b/i,
-      /\bthis.*email.*was.*sent.*to.*you.*because\b/i,
-      /\byou.*are.*receiving.*this.*email.*because\b/i,
       
       // Tiếng Việt
       /\bhủy.*đăng.ký.*nhấn.*vào.*đây\b/i,
       /\bmua.*1.*tặng.*1.*miễn.*phí\b/i,
       /\bhành.*động.*ngay.*ưu.*đãi.*hết.*hạn\b/i,
-      /\bđầu.*tư.*forex.*lãi.*suất.*cao\b/i,
     ],
     
     fromEmail: [
-      // Email marketing spam patterns
+      // Email marketing spam patterns - Tối ưu
       /^(promo|promotion|deals|offer|marketing|newsletter|sales|discount|coupon|special|limited)@/i,
       /^(noreply|no-reply|donotreply|do-not-reply|automail|automated)@.*(promo|deals|marketing|ads|shop|sale)/i,
-      /^[^@]*-?(newsletter|promo|deals|offer|sale|discount|coupon|special|limited|exclusive)-?[^@]*@/i,
-      /^[^@]+@.*(marketing|promo|ads|deals|shop|sale|discount|coupon|affiliate|campaign)\./i,
       
       // Bulk email senders
       /^[^@]*(bulk|mass|blast|campaign|auto|automated|batch)[^@]*@/i,
-      /^[^@]*(mailgun|sendgrid|mailchimp|constantcontact|aweber|getresponse)[^@]*@/i,
-      
-      // Suspicious email patterns
-      /^[^@]*[0-9]+-(promo|deals|offers|marketing|sales)@/i,
-      /^(info|contact|hello|hi|hey|support)@.*(promo|deals|marketing|shop|sale)\./i,
+      /^[^@]*(mailgun|sendgrid|mailchimp|constantcontact|aweber)[^@]*@/i,
       
       // MLM và affiliate marketing
-      /^[^@]*(mlm|affiliate|referral|commission|earning|income|opportunity|business|venture)[^@]*@/i,
-      /^[^@]*(workfromhome|makemoney|getrich|earnmoney|passiveincome|sidehustle)[^@]*@/i,
+      /^[^@]*(mlm|affiliate|referral|commission|earning|income|opportunity|business)[^@]*@/i,
+      /^[^@]*(workfromhome|makemoney|getrich|earnmoney)[^@]*@/i,
       
       // Casino và gambling spam
       /^[^@]*(casino|poker|gambling|lottery|jackpot|winner|prize|slots|betting)[^@]*@/i,
-      /^[^@]*(freespin|bonus|deposit|withdraw|payout|winnings)[^@]*@/i,
-      
-      // Adult/Dating spam
-      /^[^@]*(adult|xxx|porn|sexy|hot|dating|hookup|meet|single|lonely|mature)[^@]*@/i,
-      /^[^@]*(escort|massage|webcam|cam|model|chat|flirt)[^@]*@/i,
       
       // Pharmaceutical spam
-      /^[^@]*(viagra|cialis|pharmacy|pills|medication|drugs|prescription|meds)[^@]*@/i,
-      /^[^@]*(weightloss|diet|supplement|enhancement|muscle|fitness)[^@]*@/i
+      /^[^@]*(viagra|cialis|pharmacy|pills|medication|drugs|prescription)[^@]*@/i,
+      /^[^@]*(weightloss|diet|supplement|enhancement|muscle)[^@]*@/i
     ]
   },
 
-  // Patterns cho NGHI NGỜ - Mức độ cảnh báo
+  // Patterns cho NGHI NGỜ - Mức độ cảnh báo - Tối ưu
   SUSPICIOUS_PATTERNS: {
     title: [
       /^(re:\s*){3,}/i, // Quá nhiều Re:
@@ -225,7 +161,6 @@ const SECURITY_PATTERNS = {
       /\bbusiness.*(proposal|opportunity|partnership)\b/i,
       /\bconfidential.*(matter|business|transaction)\b/i,
       /\burgent.*(business|assistance|help)\b/i,
-      /\b(investment|business).*(proposal|opportunity).*million\b/i,
       
       // Tiếng Việt  
       /\bxin chào.*\b(bạn|anh|chị).*thân mến\b/i,
@@ -239,17 +174,7 @@ const SECURITY_PATTERNS = {
       /\bconfidential.*(transaction|business|proposal)\b/i,
       /\bbusiness.*(partnership|proposal|opportunity)\b/i,
       /\bforeign.*(investment|contract|business)\b/i,
-      /\boffshore.*(account|banking|investment)\b/i,
-      /\btax.*haven.*investment\b/i,
-      /\bmoney.*laundering.*scheme\b/i,
-      /\bnext.*of.*kin.*inheritance\b/i,
-      /\bdied.*in.*(accident|plane.*crash).*fortune\b/i,
-      /\bdeceased.*(relative|client).*fund\b/i,
-      
-      // Yêu cầu thông tin
-      /\bsend.*me.*your.*(details|information|phone)\b/i,
       /\bneed.*your.*(assistance|help|cooperation)\b/i,
-      /\btrust.*worthy.*person\b/i,
       /\bstrictly.*confidential.*matter\b/i,
       
       // Tiếng Việt
@@ -260,53 +185,25 @@ const SECURITY_PATTERNS = {
     ],
     
     fromEmail: [
-      // Email có cấu trúc đáng nghi
+      // Email có cấu trúc đáng nghi - Tối ưu
       /^[^@]*\+[^@]*@/i, // Email có dấu +
       /^[^@]*\d{4,}[^@]*@/i, // Email có 4+ số liên tiếp
       /^[^@]{1,3}@/i, // Username quá ngắn (1-3 ký tự)
       /^[^@]{30,}@/i, // Username quá dài (30+ ký tự)
-      /^[^@]*[._-]{3,}[^@]*@/i, // Quá nhiều dấu gạch/chấm
       
       // Temporary và disposable email
-      /^[^@]+@(temp|temporary|10minute|guerrilla|throwaway|disposable)mail\./i,
-      /^[^@]+@.*(temp|fake|test|dummy|trash|junk|spam|throw)\./i,
-      /^[^@]+@.*(tempmail|fakeinbox|deadaddress|spambox|binmail)\./i,
+      /(temp|fake|test|dummy|trash|junk|spam|throw)\./i,
       
       // Domain nghi ngờ
-      /^[^@]+@[^.]*\.(tk|ml|ga|cf|gq|pw|xyz|top|online|site|website|click|link|download|stream)$/i,
-      /^[^@]+@.*(\.tk\.|\.ml\.|\.ga\.|\.cf\.|\.gq\.|\.pw\.)/i,
+      /\.(tk|ml|ga|cf|gq|pw|xyz|top|online|site|website|click|link)$/i,
       
       // Pattern tự động tạo
-      /^[^@]*(auto|automatic|generated|system|bot|robot|ai)[^@]*\d*@/i,
+      /^[^@]*(auto|automatic|generated|system|bot|robot)[^@]*\d*@/i,
       /^[^@]*(default|sample|example|placeholder|demo)[^@]*@/i,
       
-      // Email có pattern lạ
-      /^[a-z]{1,2}\d{3,}@/i, // 1-2 chữ cái + 3+ số
-      /^[^@]*[qwertyuiopasdfghjklzxcvbnm]{8,}[^@]*@/i, // Keyboard pattern
-      /^[^@]*[abcdefghijklmnopqrstuvwxyz]{10,}@/i, // Alphabet sequence
-      /^[^@]*[123456789]{3,}[^@]*@/i, // Number sequence
-      
-      // Suspicious name patterns
-      /^[^@]*(user|client|customer|member|account|person|individual)\d+@/i,
-      /^[^@]*(nobody|anonymous|unknown|guest|visitor|stranger)\d*@/i,
-      
-      // Business proposal related (Nigerian scam patterns)
-      /^[^@]*(business|proposal|investment|fund|project|contract|deal)\d*@/i,
-      /^[^@]*(barrister|lawyer|attorney|solicitor|advocate|counsel)[^@]*@/i,
-      /^[^@]*(manager|director|ceo|president|chairman|officer)[^@]*@/i,
-      
-      // Suspicious geographic/cultural indicators
-      /^[^@]*(nigeria|lagos|abuja|accra|ghana|kenya|uganda|cameroon|benin)[^@]*@/i,
-      /^[^@]*(prince|princess|chief|elder|rev|pastor|imam|sheikh)[^@]*@/i,
-      
-      // Multiple underscore/dash patterns
-      /^[^@]*_{2,}[^@]*@/i, // 2+ underscores
-      /^[^@]*-{2,}[^@]*@/i, // 2+ dashes
-      /^[^@]*\.{2,}[^@]*@/i, // 2+ dots in username
-      
-      // Mixed case in suspicious way
-      /^[^@]*[a-z][A-Z][a-z][A-Z][^@]*@/i, // Alternating case
-      /^[A-Z]{2,}[a-z]*\d*@/i // Starts with multiple caps + lowercase + numbers
+      // Business proposal related
+      /^[^@]*(business|proposal|investment|fund|project|contract)[^@]*@/i,
+      /^[^@]*(barrister|lawyer|attorney|solicitor)[^@]*@/i,
     ]
   },
 
@@ -321,7 +218,6 @@ const SECURITY_PATTERNS = {
       /\bpassword.*reset.*request\b/i,
       /\binvoice.*#?\d+.*payment\b/i,
       /\bappointment.*(confirmation|reminder)\b/i,
-      /\bsubscription.*(confirmation|renewal)\b/i,
       
       // Tiếng Việt
       /\bnhắc nhở.*cuộc họp\b/i,
@@ -338,12 +234,6 @@ const SECURITY_PATTERNS = {
       /\b(kind|best).*(regards|wishes)\b/i,
       /\bsincerely.*yours?\b/i,
       /\byour.*order.*has.*been.*(shipped|confirmed|processed)\b/i,
-      /\bpassword.*reset.*instructions\b/i,
-      
-      // Professional signatures
-      /\b\w+.*\w+\s*\|\s*\w+.*department\b/i,
-      /\bphone:.*\d{3}-?\d{3}-?\d{4}\b/i,
-      /\boffice:.*\d+\b/i,
       
       // Tiếng Việt
       /\bcảm ơn.*bạn.*đã.*đặt.*hàng\b/i,
@@ -353,22 +243,17 @@ const SECURITY_PATTERNS = {
     ],
     
     fromEmail: [
-      // Trusted domains
+      // Trusted domains - Tối ưu
       /^[^@]+@(gmail|yahoo|hotmail|outlook|live|icloud)\.com$/i,
       /^[^@]+@.*\.(edu|gov|org|ac\.uk|edu\.au)$/i,
       
       // Official company emails  
-      /^(support|help|service|info|contact)@(microsoft|google|apple|amazon|paypal|facebook|twitter|linkedin|github|stackoverflow)\.com$/i,
-      /^no-?reply@(github|linkedin|facebook|twitter|google|microsoft|apple|amazon|paypal|netflix|spotify|adobe|slack)\.com$/i,
+      /^(support|help|service|info|contact)@(microsoft|google|apple|amazon|paypal|facebook|twitter|linkedin|github)\.com$/i,
+      /^no-?reply@(github|linkedin|facebook|twitter|google|microsoft|apple|amazon|paypal|netflix|spotify)\.com$/i,
       
       // Professional patterns
       /^[a-z]+\.[a-z]+@[a-z-]+\.(com|net|org)$/i, // firstname.lastname@company.com
       /^[a-z]+@[a-z-]+\.(com|net|org|co\.uk|com\.au)$/i, // name@company.com
-      
-      // University/Government
-      /^[^@]+@.*\.edu$/i,
-      /^[^@]+@.*\.gov$/i,
-      /^[^@]+@.*\.org$/i,
     ]
   }
 };

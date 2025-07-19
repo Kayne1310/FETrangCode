@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Row, Col, Card, Typography, Input, Button, Select, Tag, Space, 
-  List, Avatar, Divider, Breadcrumb, Pagination, Affix, Anchor
+  List, Avatar, Divider, Breadcrumb, Pagination, Affix, Anchor, Drawer
 } from 'antd';
 import { 
   SearchOutlined,
@@ -16,7 +16,8 @@ import {
   FireOutlined,
   BulbOutlined,
   HomeOutlined,
-  TagOutlined
+  TagOutlined,
+  UpOutlined
 } from '@ant-design/icons';
 
 const { Title, Paragraph, Text } = Typography;
@@ -27,6 +28,10 @@ const BlogPage = () => {
   const [searchValue, setSearchValue] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedPost, setSelectedPost] = useState(null);
+  // Mobile responsive state
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isVerySmall, setIsVerySmall] = useState(window.innerWidth <= 480);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const categories = [
     { value: 'all', label: 'Tất cả', count: 30 },
@@ -321,6 +326,17 @@ const BlogPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [selectedPost]);
 
+  // Handle window resize for responsive design
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+      setIsVerySmall(window.innerWidth <= 480);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   if (selectedPost) {
     return (
       <div className="blog-page">
@@ -414,21 +430,15 @@ const BlogPage = () => {
             </Col>
 
             <Col xs={24} lg={6}>
-              <div style={{ position: 'sticky', top: '50px' }}>
+              <div style={{ position: isMobile ? 'relative' : 'sticky', top: isMobile ? '0' : '50px' }}>
                 <Space direction="vertical" size="large" style={{ width: '100%' }}>
-                  <Card size="small" title="Mục lục" bordered={false}>
-                    <Anchor>
-                      <Link href="#section1" title="Giới thiệu" />
-                      <Link href="#section2" title="Nội dung chính" />
-                      <Link href="#section3" title="Hướng dẫn" />
-                      <Link href="#section4" title="Kết luận" />
-                    </Anchor>
-                  </Card>
+               
 
                   <Button 
                     type="primary" 
                     block 
                     onClick={handleBackToList}
+                    style={{ height: isMobile ? '44px' : '40px', fontSize: isMobile ? '14px' : '13px' }}
                   >
                     ← Quay lại danh sách
                   </Button>
@@ -506,7 +516,7 @@ const BlogPage = () => {
                   style={{ 
                     color: 'white', 
                     marginBottom: 16,
-                    fontSize: 'clamp(1.5rem, 4vw, 2.2rem)'
+                    fontSize: isVerySmall ? '16px' : isMobile ? '18px' : 'clamp(1.5rem, 4vw, 2.2rem)'
                   }}
                 >
                   {blogPosts[0].title}
@@ -560,7 +570,7 @@ const BlogPage = () => {
                   style={{ 
                     width: '100%',
                     maxWidth: '400px',
-                    height: '250px',
+                    height: isVerySmall ? '160px' : isMobile ? '180px' : '250px',
                     objectFit: 'cover',
                     borderRadius: '12px',
                     boxShadow: '0 8px 24px rgba(0,0,0,0.3)'
@@ -653,7 +663,7 @@ const BlogPage = () => {
                             alt={item.title}
                             style={{ 
                               width: '100%', 
-                              height: 160, 
+                              height: isVerySmall ? 140 : isMobile ? 160 : 160, 
                               objectFit: 'cover',
                               borderRadius: 8 
                             }}
@@ -735,8 +745,8 @@ const BlogPage = () => {
 
           {/* Sidebar */}
           <Col xs={24} lg={6}>
-            <div style={{ position: 'sticky', top: '100px' }}>
-              <Space direction="vertical" size="large" style={{ width: '100%' }}>
+            <div style={{ position: isMobile ? 'relative' : 'sticky', top: isMobile ? '0' : '100px' }}>
+              <Space direction="vertical" size={isMobile ? 'middle' : 'large'} style={{ width: '100%' }}>
                 {/* Categories */}
                 <Card title="Chuyên mục" size="small" bordered={false}>
                   <List

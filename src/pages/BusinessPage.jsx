@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Row, Col, Card, Typography, Table, Button, Select, DatePicker, 
   Statistic, Progress, Tag, Space, Alert, Tabs, List, Avatar,
-  Switch, Tooltip, Badge, Dropdown, Menu, Modal, Form, Input, Spin
+  Switch, Tooltip, Badge, Dropdown, Menu, Modal, Form, Input, Spin, Drawer
 } from 'antd';
 import { Column, Pie, Line, Area } from '@ant-design/plots';
 import { 
@@ -35,8 +35,9 @@ const BusinessPage = () => {
   const [loading, setLoading] = useState(false);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
-  const [selectedPeriod, setSelectedPeriod] = useState('7days');
-  const [alertVisible, setAlertVisible] = useState(false);
+  // Mobile responsive state
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [mobileFiltersVisible, setMobileFiltersVisible] = useState(false);
 
   // State for Email Logs Table
   const [emailLogs, setEmailLogs] = useState([]);
@@ -447,6 +448,16 @@ const BusinessPage = () => {
     fetchAnalyticsData(1, batchSize); // Fetch analytics data on mount with selected batch size
   }, []); // Empty dependency array - only run once
 
+  // Handle window resize for responsive design
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Handle table change (pagination, sort, filter)
   const handleTableChange = (newPagination, tableFilters, newSorter) => {
     setPagination({
@@ -493,15 +504,6 @@ const BusinessPage = () => {
     }
   };
 
-  const getActionColor = (action) => {
-    switch (action) {
-      case 'delivered': return 'green';
-      case 'quarantined': return 'orange';
-      case 'blocked': return 'red';
-      default: return 'default';
-    }
-  };
-
   // Process suspicious indicators - split, deduplicate, and clean
   const processSuspiciousIndicators = (indicators) => {
     if (!indicators || typeof indicators !== 'string') return [];
@@ -515,7 +517,7 @@ const BusinessPage = () => {
           return parsed.slice(0, 5); // Return first 5 if already array
         }
         indicatorText = parsed.toString();
-      } catch (e) {
+      } catch {
         // Not JSON, continue with string processing
       }
 
@@ -941,7 +943,7 @@ const BusinessPage = () => {
                   }}
                   interactions={[{ type: 'element-active' }]}
                   color={['#52c41a', '#faad14', '#fa8c16', '#f5222d']}
-                  height={300}
+                  height={isMobile ? 250 : 300}
                 />
               ) : (
                 <div style={{ textAlign: 'center', padding: '60px 0', color: '#999' }}>
@@ -975,7 +977,7 @@ const BusinessPage = () => {
                       alias: 'Số lượng',
                     },
                   }}
-                  height={300}
+                  height={isMobile ? 250 : 300}
                 />
               ) : (
                 <div style={{ textAlign: 'center', padding: '60px 0', color: '#999' }}>
@@ -1004,7 +1006,7 @@ const BusinessPage = () => {
                       fill: '#aaa',
                     },
                   }}
-                  height={300}
+                  height={isMobile ? 250 : 300}
                 />
               ) : (
                 <div style={{ textAlign: 'center', padding: '60px 0', color: '#999' }}>
@@ -1035,7 +1037,7 @@ const BusinessPage = () => {
                       fontSize: 12,
                     },
                   }}
-                  height={300}
+                  height={isMobile ? 250 : 300}
                   meta={{
                     range: {
                       alias: 'Mức độ rủi ro',
@@ -1137,7 +1139,7 @@ const BusinessPage = () => {
                   seriesField="type"
                   color={['#52c41a', '#f5222d']}
                   smooth={true}
-                  height={400}
+                  height={isMobile ? 300 : 400}
                 />
               ) : (
                 <div style={{ textAlign: 'center', padding: '60px 0', color: '#999' }}>
@@ -1290,49 +1292,58 @@ const BusinessPage = () => {
               title="Nhật ký Email" 
               bordered={false}
               extra={
-                <Space>
-                  <Input
-                    placeholder="Tìm kiếm theo tiêu đề..."
-                    value={filters.title}
-                    onChange={(e) => setFilters(prev => ({ ...prev, title: e.target.value }))}
-                    style={{ width: 200 }}
-                  />
-                  <Input
-                    placeholder="Tìm kiếm theo người gửi..."
-                    value={filters.from_email}
-                    onChange={(e) => setFilters(prev => ({ ...prev, from_email: e.target.value }))}
-                    style={{ width: 200 }}
-                  />
-                  <Input
-                    placeholder="Tìm kiếm theo người nhận..."
-                    value={filters.to_email}
-                    onChange={(e) => setFilters(prev => ({ ...prev, to_email: e.target.value }))}
-                    style={{ width: 200 }}
-                  />
-            
+                !isMobile ? (
+                  <Space>
+                    <Input
+                      placeholder="Tìm kiếm theo tiêu đề..."
+                      value={filters.title}
+                      onChange={(e) => setFilters(prev => ({ ...prev, title: e.target.value }))}
+                      style={{ width: 200 }}
+                    />
+                    <Input
+                      placeholder="Tìm kiếm theo người gửi..."
+                      value={filters.from_email}
+                      onChange={(e) => setFilters(prev => ({ ...prev, from_email: e.target.value }))}
+                      style={{ width: 200 }}
+                    />
+                    <Input
+                      placeholder="Tìm kiếm theo người nhận..."
+                      value={filters.to_email}
+                      onChange={(e) => setFilters(prev => ({ ...prev, to_email: e.target.value }))}
+                      style={{ width: 200 }}
+                    />
+              
+                    <Button 
+                      type="primary" 
+                      icon={<SearchOutlined />} 
+                      onClick={handleSearch}
+                    >
+                      Tìm kiếm
+                    </Button>
+                    <Button icon={<FilterOutlined />} onClick={() => {
+                      setFilters({ title: '', from_email: '', to_email: '', category: '' });
+                      setPagination(prev => ({ ...prev, pageIndex: 1 }));
+                      setSort({ column: 'received_time', order: 'descend' });
+                      // Trigger search after clearing filters
+                      setTimeout(() => {
+                        fetchEmails(
+                          { ...pagination, pageIndex: 1 },
+                          { title: '', from_email: '', to_email: '', category: '' },
+                          { column: 'received_time', order: 'descend' }
+                        );
+                      }, 0);
+                    }}>
+                      Xóa bộ lọc
+                    </Button>
+                  </Space>
+                ) : (
                   <Button 
-                    type="primary" 
-                    icon={<SearchOutlined />} 
-                    onClick={handleSearch}
+                    icon={<FilterOutlined />} 
+                    onClick={() => setMobileFiltersVisible(true)}
                   >
-                    Tìm kiếm
+                    Bộ lọc
                   </Button>
-                  <Button icon={<FilterOutlined />} onClick={() => {
-                    setFilters({ title: '', from_email: '', to_email: '', category: '' });
-                    setPagination(prev => ({ ...prev, pageIndex: 1 }));
-                    setSort({ column: 'received_time', order: 'descend' });
-                    // Trigger search after clearing filters
-                    setTimeout(() => {
-                      fetchEmails(
-                        { ...pagination, pageIndex: 1 },
-                        { title: '', from_email: '', to_email: '', category: '' },
-                        { column: 'received_time', order: 'descend' }
-                      );
-                    }, 0);
-                  }}>
-                    Xóa bộ lọc
-                  </Button>
-                </Space>
+                )
               }
             >
               <Table
@@ -1419,6 +1430,73 @@ const BusinessPage = () => {
 
 
         </Tabs>
+
+        {/* Mobile Search Filters Drawer */}
+        <Drawer
+          title="Tìm kiếm & Bộ lọc"
+          placement="bottom"
+          height={300}
+          open={mobileFiltersVisible}
+          onClose={() => setMobileFiltersVisible(false)}
+          bodyStyle={{ padding: '16px' }}
+        >
+          <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+            <Input
+              placeholder="Tìm kiếm theo tiêu đề..."
+              value={filters.title}
+              onChange={(e) => setFilters(prev => ({ ...prev, title: e.target.value }))}
+              prefix={<SearchOutlined />}
+            />
+            <Input
+              placeholder="Tìm kiếm theo người gửi..."
+              value={filters.from_email}
+              onChange={(e) => setFilters(prev => ({ ...prev, from_email: e.target.value }))}
+              prefix={<MailOutlined />}
+            />
+            <Input
+              placeholder="Tìm kiếm theo người nhận..."
+              value={filters.to_email}
+              onChange={(e) => setFilters(prev => ({ ...prev, to_email: e.target.value }))}
+              prefix={<MailOutlined />}
+            />
+            <Row gutter={[8, 8]}>
+              <Col span={12}>
+                <Button 
+                  type="primary" 
+                  block
+                  icon={<SearchOutlined />} 
+                  onClick={() => {
+                    handleSearch();
+                    setMobileFiltersVisible(false);
+                  }}
+                >
+                  Tìm kiếm
+                </Button>
+              </Col>
+              <Col span={12}>
+                <Button 
+                  block
+                  icon={<FilterOutlined />} 
+                  onClick={() => {
+                    setFilters({ title: '', from_email: '', to_email: '', category: '' });
+                    setPagination(prev => ({ ...prev, pageIndex: 1 }));
+                    setSort({ column: 'received_time', order: 'descend' });
+                    setTimeout(() => {
+                      fetchEmails(
+                        { ...pagination, pageIndex: 1 },
+                        { title: '', from_email: '', to_email: '', category: '' },
+                        { column: 'received_time', order: 'descend' }
+                      );
+                    }, 0);
+                    setMobileFiltersVisible(false);
+                  }}
+                >
+                  Xóa bộ lọc
+                </Button>
+              </Col>
+            </Row>
+          </Space>
+        </Drawer>
       </div>
     </div>
   );

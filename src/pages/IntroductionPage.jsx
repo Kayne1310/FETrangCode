@@ -5,20 +5,20 @@ const IntroductionPage = () => {
     const teamMembers = [
         {
             name: "Khánh",
-            role: "Full Stack Developer",
-            description: "Chuyên về phát triển toàn diện và tích hợp hệ thống",
+            role: "Dev",
+            description: "Chuyên về phát triển và tích hợp hệ thống",
             avatar: "👨‍💻"
         },
         {
             name: "Toàn",
-            role: "Full Stack Developer", 
-            description: "Chuyên về phát triển toàn diện và tích hợp hệ thống",
+            role: "Dev", 
+            description: "Chuyên về phát triển và tích hợp hệ thống",
             avatar: "👨‍💼"
         },
         {
             name: "Trường",
-            role: "Full Stack Developer",
-            description: "Chuyên về phát triển toàn diện và tích hợp hệ thống",
+            role: "Dev",
+            description: "Chuyên về phát triển và tích hợp hệ thống",
             avatar: "👨‍🔬"
         }
     ];
