@@ -1,0 +1,679 @@
+import React, { useState } from 'react';
+import { 
+  Row, Col, Card, Typography, Input, Button, Select, Tag, Space, 
+  List, Avatar, Divider, Breadcrumb, Pagination, Affix, Anchor
+} from 'antd';
+import { 
+  SearchOutlined,
+  CalendarOutlined,
+  UserOutlined,
+  EyeOutlined,
+  LikeOutlined,
+  ShareAltOutlined,
+  BookOutlined,
+  SafetyOutlined,
+  ExclamationCircleOutlined,
+  FireOutlined,
+  BulbOutlined,
+  HomeOutlined,
+  TagOutlined
+} from '@ant-design/icons';
+
+const { Title, Paragraph, Text } = Typography;
+const { Option } = Select;
+const { Link } = Anchor;
+
+const BlogPage = () => {
+  const [searchValue, setSearchValue] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedPost, setSelectedPost] = useState(null);
+
+  const categories = [
+    { value: 'all', label: 'Tất cả', count: 24 },
+    { value: 'phishing', label: 'Phishing', count: 8 },
+    { value: 'spam', label: 'Spam', count: 6 },
+    { value: 'security', label: 'Bảo mật', count: 7 },
+    { value: 'tips', label: 'Mẹo hay', count: 3 }
+  ];
+
+  const blogPosts = [
+    {
+      id: 1,
+      title: '10 Dấu hiệu Nhận biết Email Phishing không thể bỏ qua',
+      excerpt: 'Tìm hiểu các dấu hiệu quan trọng giúp bạn nhận biết và tránh xa các email lừa đảo phishing nguy hiểm.',
+      content: `
+        <h2>Email Phishing là gì?</h2>
+        <p>Email phishing là một hình thức tấn công mạng trong đó kẻ lừa đảo giả mạo các tổ chức đáng tin cậy để đánh cắp thông tin cá nhân như mật khẩu, số tài khoản ngân hàng, hoặc thông tin thẻ tín dụng.</p>
+        
+        <h2>10 Dấu hiệu cần chú ý:</h2>
+        <h3>1. Địa chỉ email người gửi đáng ngờ</h3>
+        <p>Kiểm tra kỹ địa chỉ email người gửi. Các email phishing thường sử dụng tên miền giống nhưng khác một vài ký tự với tổ chức thật.</p>
+        
+        <h3>2. Lỗi chính tả và ngữ pháp</h3>
+        <p>Các email phishing thường chứa nhiều lỗi chính tả, ngữ pháp hoặc sử dụng ngôn ngữ không chuyên nghiệp.</p>
+        
+        <h3>3. Yêu cầu cấp bách</h3>
+        <p>Tạo cảm giác gấp gáp, đe dọa đóng tài khoản hoặc yêu cầu hành động ngay lập tức.</p>
+        
+        <h3>4. Yêu cầu thông tin nhạy cảm</h3>
+        <p>Các tổ chức uy tín sẽ không bao giờ yêu cầu mật khẩu hay thông tin thẻ tín dụng qua email.</p>
+        
+        <h3>5. Liên kết đáng ngờ</h3>
+        <p>Di chuột qua liên kết để xem URL thực tế. Nếu không khớp với tên miền chính thức thì không nhấp vào.</p>
+        
+        <p><strong>Lời khuyên:</strong> Khi nghi ngờ, hãy liên hệ trực tiếp với tổ chức qua kênh chính thức để xác minh.</p>
+      `,
+      category: 'phishing',
+      author: 'Nguyễn An',
+      publishDate: '2025-01-18',
+      readTime: 5,
+      views: 1248,
+      likes: 156,
+      image: '/api/placeholder/400/250',
+      tags: ['phishing', 'bảo mật', 'email', 'lừa đảo']
+    },
+    {
+      id: 2,
+      title: 'Cách Thiết lập Email Filter để Chặn Spam Hiệu quả',
+      excerpt: 'Hướng dẫn chi tiết cách thiết lập bộ lọc email để tự động chặn spam và bảo vệ hộp thư của bạn.',
+      content: `
+        <h2>Tại sao cần thiết lập Email Filter?</h2>
+        <p>Email filter giúp tự động phân loại, chuyển hướng hoặc chặn các email không mong muốn, giúp bạn tiết kiệm thời gian và bảo vệ khỏi spam.</p>
+        
+        <h2>Các bước thiết lập cơ bản:</h2>
+        <h3>1. Truy cập cài đặt email</h3>
+        <p>Đăng nhập vào email của bạn và tìm mục "Filters", "Rules" hoặc "Cài đặt".</p>
+        
+        <h3>2. Tạo rule mới</h3>
+        <p>Chọn "Create new rule" hoặc "Tạo quy tắc mới".</p>
+        
+        <h3>3. Thiết lập điều kiện</h3>
+        <ul>
+        <li>Từ khóa trong tiêu đề: "URGENT", "FREE", "WINNER"</li>
+        <li>Địa chỉ người gửi chứa: noreply@, marketing@</li>
+        <li>Nội dung chứa: "Click now", "Limited time"</li>
+        </ul>
+        
+        <h3>4. Thiết lập hành động</h3>
+        <ul>
+        <li>Chuyển vào thư mục Spam</li>
+        <li>Xóa tự động</li>
+        <li>Đánh dấu là đã đọc</li>
+        <li>Chuyển tiếp đến email khác</li>
+        </ul>
+        
+        <p><strong>Lưu ý:</strong> Kiểm tra thường xuyên thư mục spam để đảm bảo không bỏ sót email quan trọng.</p>
+      `,
+      category: 'spam',
+      author: 'Trần Minh',
+      publishDate: '2025-01-17',
+      readTime: 7,
+      views: 892,
+      likes: 98,
+      image: '/api/placeholder/400/250',
+      tags: ['spam', 'email filter', 'bảo mật']
+    },
+    {
+      id: 3,
+      title: 'Bảo mật Email doanh nghiệp: Những điều cần biết',
+      excerpt: 'Tổng quan về các biện pháp bảo mật email quan trọng mà mọi doanh nghiệp cần áp dụng.',
+      content: `
+        <h2>Tầm quan trọng của Bảo mật Email Doanh nghiệp</h2>
+        <p>Email là kênh giao tiếp chính của doanh nghiệp, chứa nhiều thông tin nhạy cảm. Việc bảo mật email không chỉ bảo vệ thông tin mà còn duy trì uy tín công ty.</p>
+        
+        <h2>Các biện pháp bảo mật cần thiết:</h2>
+        
+        <h3>1. Xác thực hai yếu tố (2FA)</h3>
+        <p>Bật 2FA cho tất cả tài khoản email quan trọng để tăng cường bảo mật.</p>
+        
+        <h3>2. Mã hóa email</h3>
+        <p>Sử dụng các giao thức mã hóa như TLS/SSL để bảo vệ email khi truyền tải.</p>
+        
+        <h3>3. Chính sách mật khẩu mạnh</h3>
+        <p>Yêu cầu nhân viên sử dụng mật khẩu phức tạp và thay đổi định kỳ.</p>
+        
+        <h3>4. Đào tạo nhân viên</h3>
+        <p>Tổ chức khóa đào tạo về nhận biết và phòng tránh các mối đe dọa email.</p>
+        
+        <h3>5. Sử dụng Email Security Gateway</h3>
+        <p>Triển khai hệ thống lọc email tiên tiến để chặn spam, phishing và malware.</p>
+        
+        <h3>6. Backup định kỳ</h3>
+        <p>Sao lưu email quan trọng để tránh mất dữ liệu.</p>
+        
+        <p><strong>Kết luận:</strong> Bảo mật email là một quá trình liên tục, cần sự phối hợp của cả công nghệ và con người.</p>
+      `,
+      category: 'security',
+      author: 'Lê Hương',
+      publishDate: '2025-01-16',
+      readTime: 8,
+      views: 1456,
+      likes: 203,
+      image: '/api/placeholder/400/250',
+      tags: ['doanh nghiệp', 'bảo mật', '2FA', 'mã hóa']
+    },
+    {
+      id: 4,
+      title: '5 Mẹo đơn giản để Bảo vệ Email cá nhân',
+      excerpt: 'Những mẹo đơn giản nhưng hiệu quả giúp bạn bảo vệ email cá nhân khỏi các mối đe dọa.',
+      content: `
+        <h2>Bảo vệ email cá nhân - Không khó như bạn nghĩ!</h2>
+        <p>Với một vài bước đơn giản, bạn có thể tăng cường đáng kể độ an toàn cho email cá nhân của mình.</p>
+        
+        <h2>5 Mẹo hiệu quả:</h2>
+        
+        <h3>1. Sử dụng mật khẩu mạnh và unique</h3>
+        <p>Mỗi tài khoản email nên có một mật khẩu riêng, phức tạp với ít nhất 12 ký tự.</p>
+        
+        <h3>2. Bật xác thực hai yếu tố</h3>
+        <p>Sử dụng Google Authenticator hoặc SMS để tăng thêm lớp bảo mật.</p>
+        
+        <h3>3. Cẩn thận với Wi-Fi công cộng</h3>
+        <p>Tránh truy cập email qua Wi-Fi công cộng. Nếu bắt buộc, hãy sử dụng VPN.</p>
+        
+        <h3>4. Kiểm tra hoạt động tài khoản thường xuyên</h3>
+        <p>Xem lại lịch sử đăng nhập để phát hiện hoạt động bất thường.</p>
+        
+        <h3>5. Cập nhật phần mềm thường xuyên</h3>
+        <p>Giữ cho email client và trình duyệt luôn được cập nhật phiên bản mới nhất.</p>
+        
+        <p><strong>Bonus tip:</strong> Sử dụng email alias để đăng ký các dịch vụ không quan trọng.</p>
+      `,
+      category: 'tips',
+      author: 'Phạm Đức',
+      publishDate: '2025-01-15',
+      readTime: 4,
+      views: 734,
+      likes: 89,
+      image: '/api/placeholder/400/250',
+      tags: ['mẹo hay', 'cá nhân', 'mật khẩu', 'bảo mật']
+    },
+    {
+      id: 5,
+      title: 'Social Engineering qua Email: Cách thức và Phòng tránh',
+      excerpt: 'Tìm hiểu về kỹ thuật social engineering qua email và cách bảo vệ bản thân khỏi những cuộc tấn công tinh vi này.',
+      content: `
+        <h2>Social Engineering là gì?</h2>
+        <p>Social Engineering (kỹ thuật xã hội) là phương pháp tấn công dựa vào thao túng tâm lý con người thay vì khai thác lỗ hổng kỹ thuật.</p>
+        
+        <h2>Các kỹ thuật phổ biến:</h2>
+        
+        <h3>1. Pretexting (Giả danh)</h3>
+        <p>Giả mạo danh tính người có thẩm quyền như sếp, IT support, ngân hàng để yêu cầu thông tin.</p>
+        
+        <h3>2. Baiting (Mồi câu)</h3>
+        <p>Đưa ra lời hứa hấp dẫn như phần thưởng, quà tặng để dụ người dùng thực hiện hành động.</p>
+        
+        <h3>3. Urgency (Tạo cảm giác cấp bách)</h3>
+        <p>Sử dụng từ ngữ như "URGENT", "NGAY LẬP TỨC" để làm người nhận hoảng sợ và hành động vội vã.</p>
+        
+        <h3>4. Authority (Lợi dụng quyền lực)</h3>
+        <p>Giả mạo email từ cấp trên, chính phủ, hoặc tổ chức có uy tín.</p>
+        
+        <h2>Cách phòng tránh:</h2>
+        <ul>
+        <li><strong>Xác minh nguồn:</strong> Luôn xác nhận qua kênh chính thức</li>
+        <li><strong>Đừng vội vàng:</strong> Dành thời gian suy nghĩ trước khi hành động</li>
+        <li><strong>Giữ bí mật thông tin:</strong> Không chia sẻ thông tin nhạy cảm qua email</li>
+        <li><strong>Đào tạo nhận thức:</strong> Cập nhật kiến thức về các kỹ thuật mới</li>
+        </ul>
+        
+        <p><strong>Nhớ rằng:</strong> Kẻ tấn công luôn khai thác tâm lý con người. Hãy luôn tỉnh táo và thận trọng!</p>
+      `,
+      category: 'security',
+      author: 'Võ Hải',
+      publishDate: '2025-01-14',
+      readTime: 6,
+      views: 1023,
+      likes: 142,
+      image: '/api/placeholder/400/250',
+      tags: ['social engineering', 'tâm lý', 'phòng tránh']
+    }
+  ];
+
+  const filteredPosts = blogPosts.filter(post => {
+    const matchesSearch = post.title.toLowerCase().includes(searchValue.toLowerCase()) ||
+                         post.excerpt.toLowerCase().includes(searchValue.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || post.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  const getCategoryIcon = (category) => {
+    switch (category) {
+      case 'phishing': return <ExclamationCircleOutlined />;
+      case 'spam': return <FireOutlined />;
+      case 'security': return <SafetyOutlined />;
+      case 'tips': return <BulbOutlined />;
+      default: return <BookOutlined />;
+    }
+  };
+
+  const getCategoryColor = (category) => {
+    switch (category) {
+      case 'phishing': return 'red';
+      case 'spam': return 'orange';
+      case 'security': return 'green';
+      case 'tips': return 'blue';
+      default: return 'default';
+    }
+  };
+
+  const handleReadMore = (post) => {
+    setSelectedPost(post);
+  };
+
+  const handleBackToList = () => {
+    setSelectedPost(null);
+  };
+
+  if (selectedPost) {
+    return (
+      <div className="blog-page">
+        <div className="container">
+          <Breadcrumb style={{ marginBottom: 24 }}>
+            <Breadcrumb.Item href="#" onClick={handleBackToList}>
+              <HomeOutlined />
+            </Breadcrumb.Item>
+            <Breadcrumb.Item href="#" onClick={handleBackToList}>
+              <BookOutlined />
+              Blog
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>{selectedPost.title}</Breadcrumb.Item>
+          </Breadcrumb>
+
+          <Row gutter={[24, 24]}>
+            <Col xs={24} lg={18}>
+              <Card className="blog-post-detail" bordered={false}>
+                <div className="post-header">
+                  <Title level={1} style={{ marginBottom: 16 }}>
+                    {selectedPost.title}
+                  </Title>
+                  
+                  <Space size="middle" style={{ marginBottom: 24 }}>
+                    <Space>
+                      <UserOutlined />
+                      <Text>{selectedPost.author}</Text>
+                    </Space>
+                    <Space>
+                      <CalendarOutlined />
+                      <Text>{new Date(selectedPost.publishDate).toLocaleDateString('vi-VN')}</Text>
+                    </Space>
+                    <Space>
+                      <EyeOutlined />
+                      <Text>{selectedPost.views} lượt xem</Text>
+                    </Space>
+                    <Tag 
+                      color={getCategoryColor(selectedPost.category)}
+                      icon={getCategoryIcon(selectedPost.category)}
+                    >
+                      {selectedPost.category}
+                    </Tag>
+                  </Space>
+                  
+                  <div className="post-image">
+                    <img 
+                      src={selectedPost.image} 
+                      alt={selectedPost.title}
+                      style={{ width: '100%', maxHeight: 400, objectFit: 'cover', borderRadius: 8 }}
+                    />
+                  </div>
+                </div>
+
+                <Divider />
+
+                <div 
+                  className="post-content"
+                  dangerouslySetInnerHTML={{ __html: selectedPost.content }}
+                  style={{ 
+                    fontSize: '16px',
+                    lineHeight: '1.8',
+                    marginBottom: 32
+                  }}
+                />
+
+                <Divider />
+
+                <div className="post-footer">
+                  <Row justify="space-between" align="middle">
+                    <Col>
+                      <Space wrap>
+                        <Text strong>Tags: </Text>
+                        {selectedPost.tags.map(tag => (
+                          <Tag key={tag} icon={<TagOutlined />}>{tag}</Tag>
+                        ))}
+                      </Space>
+                    </Col>
+                    <Col>
+                      <Space>
+                        <Button icon={<LikeOutlined />} type="text">
+                          {selectedPost.likes}
+                        </Button>
+                        <Button icon={<ShareAltOutlined />} type="text">
+                          Chia sẻ
+                        </Button>
+                      </Space>
+                    </Col>
+                  </Row>
+                </div>
+              </Card>
+            </Col>
+
+            <Col xs={24} lg={6}>
+              <Affix offsetTop={24}>
+                <Space direction="vertical" size="large" style={{ width: '100%' }}>
+                  <Card size="small" title="Mục lục" bordered={false}>
+                    <Anchor>
+                      <Link href="#section1" title="Giới thiệu" />
+                      <Link href="#section2" title="Nội dung chính" />
+                      <Link href="#section3" title="Hướng dẫn" />
+                      <Link href="#section4" title="Kết luận" />
+                    </Anchor>
+                  </Card>
+
+                  <Button 
+                    type="primary" 
+                    block 
+                    onClick={handleBackToList}
+                  >
+                    ← Quay lại danh sách
+                  </Button>
+
+                  <Card size="small" title="Bài viết liên quan" bordered={false}>
+                    <List
+                      size="small"
+                      dataSource={blogPosts.filter(p => 
+                        p.id !== selectedPost.id && p.category === selectedPost.category
+                      ).slice(0, 3)}
+                      renderItem={item => (
+                        <List.Item style={{ padding: '8px 0' }}>
+                          <List.Item.Meta
+                            title={
+                              <Text 
+                                style={{ fontSize: '12px', cursor: 'pointer' }}
+                                onClick={() => handleReadMore(item)}
+                              >
+                                {item.title}
+                              </Text>
+                            }
+                            description={
+                              <Text type="secondary" style={{ fontSize: '11px' }}>
+                                {item.readTime} phút đọc
+                              </Text>
+                            }
+                          />
+                        </List.Item>
+                      )}
+                    />
+                  </Card>
+                </Space>
+              </Affix>
+            </Col>
+          </Row>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="blog-page">
+      <div className="container">
+        <div className="page-header">
+          <Title level={1} className="page-title">
+            <BookOutlined /> Blog Bảo mật Email
+          </Title>
+          <Paragraph className="page-description">
+            Chia sẻ kiến thức, mẹo hay và cập nhật mới nhất về bảo mật email
+          </Paragraph>
+        </div>
+
+        {/* Search and Filters */}
+        <Card className="search-filters" bordered={false} style={{ marginBottom: 24 }}>
+          <Row gutter={[16, 16]} align="middle">
+            <Col xs={24} sm={12} lg={8}>
+              <Input
+                placeholder="Tìm kiếm bài viết..."
+                prefix={<SearchOutlined />}
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                size="large"
+              />
+            </Col>
+            <Col xs={24} sm={12} lg={6}>
+              <Select
+                value={selectedCategory}
+                onChange={setSelectedCategory}
+                style={{ width: '100%' }}
+                size="large"
+              >
+                {categories.map(cat => (
+                  <Option key={cat.value} value={cat.value}>
+                    <Space>
+                      {getCategoryIcon(cat.value)}
+                      {cat.label} ({cat.count})
+                    </Space>
+                  </Option>
+                ))}
+              </Select>
+            </Col>
+            <Col xs={24} sm={24} lg={10}>
+              <Space wrap>
+                {categories.slice(1).map(cat => (
+                  <Button
+                    key={cat.value}
+                    type={selectedCategory === cat.value ? 'primary' : 'default'}
+                    icon={getCategoryIcon(cat.value)}
+                    onClick={() => setSelectedCategory(cat.value)}
+                    size="small"
+                  >
+                    {cat.label}
+                  </Button>
+                ))}
+              </Space>
+            </Col>
+          </Row>
+        </Card>
+
+        {/* Blog Posts Grid */}
+        <Row gutter={[24, 24]}>
+          <Col xs={24} lg={18}>
+            <List
+              grid={{ 
+                gutter: 16, 
+                xs: 1, 
+                sm: 1, 
+                md: 1, 
+                lg: 1, 
+                xl: 1 
+              }}
+              dataSource={filteredPosts}
+              pagination={{
+                pageSize: 5,
+                showSizeChanger: false,
+                showQuickJumper: true,
+                showTotal: (total, range) => 
+                  `${range[0]}-${range[1]} của ${total} bài viết`
+              }}
+              renderItem={item => (
+                <List.Item>
+                  <Card 
+                    hoverable
+                    className="blog-post-card"
+                    bordered={false}
+                  >
+                    <Row gutter={[16, 16]}>
+                      <Col xs={24} sm={8}>
+                        <div className="post-image">
+                          <img 
+                            src={item.image} 
+                            alt={item.title}
+                            style={{ 
+                              width: '100%', 
+                              height: 160, 
+                              objectFit: 'cover',
+                              borderRadius: 8 
+                            }}
+                          />
+                        </div>
+                      </Col>
+                      <Col xs={24} sm={16}>
+                        <div className="post-content">
+                          <Space style={{ marginBottom: 8 }}>
+                            <Tag 
+                              color={getCategoryColor(item.category)}
+                              icon={getCategoryIcon(item.category)}
+                            >
+                              {item.category}
+                            </Tag>
+                            <Text type="secondary" style={{ fontSize: '12px' }}>
+                              {item.readTime} phút đọc
+                            </Text>
+                          </Space>
+                          
+                          <Title 
+                            level={4} 
+                            style={{ marginBottom: 8, cursor: 'pointer' }}
+                            onClick={() => handleReadMore(item)}
+                          >
+                            {item.title}
+                          </Title>
+                          
+                          <Paragraph 
+                            style={{ marginBottom: 16, color: '#666' }}
+                            ellipsis={{ rows: 2 }}
+                          >
+                            {item.excerpt}
+                          </Paragraph>
+                          
+                          <Row justify="space-between" align="middle">
+                            <Col>
+                              <Space size="middle">
+                                <Space size="small">
+                                  <UserOutlined style={{ fontSize: '12px' }} />
+                                  <Text style={{ fontSize: '12px' }}>{item.author}</Text>
+                                </Space>
+                                <Space size="small">
+                                  <CalendarOutlined style={{ fontSize: '12px' }} />
+                                  <Text style={{ fontSize: '12px' }}>
+                                    {new Date(item.publishDate).toLocaleDateString('vi-VN')}
+                                  </Text>
+                                </Space>
+                              </Space>
+                            </Col>
+                            <Col>
+                              <Space>
+                                <Space size="small">
+                                  <EyeOutlined style={{ fontSize: '12px' }} />
+                                  <Text style={{ fontSize: '12px' }}>{item.views}</Text>
+                                </Space>
+                                <Space size="small">
+                                  <LikeOutlined style={{ fontSize: '12px' }} />
+                                  <Text style={{ fontSize: '12px' }}>{item.likes}</Text>
+                                </Space>
+                                <Button 
+                                  type="link" 
+                                  size="small"
+                                  onClick={() => handleReadMore(item)}
+                                >
+                                  Đọc thêm →
+                                </Button>
+                              </Space>
+                            </Col>
+                          </Row>
+                        </div>
+                      </Col>
+                    </Row>
+                  </Card>
+                </List.Item>
+              )}
+            />
+          </Col>
+
+          {/* Sidebar */}
+          <Col xs={24} lg={6}>
+            <Affix offsetTop={24}>
+              <Space direction="vertical" size="large" style={{ width: '100%' }}>
+                {/* Categories */}
+                <Card title="Chuyên mục" size="small" bordered={false}>
+                  <List
+                    size="small"
+                    dataSource={categories.slice(1)}
+                    renderItem={item => (
+                      <List.Item 
+                        style={{ 
+                          padding: '8px 0',
+                          cursor: 'pointer',
+                          backgroundColor: selectedCategory === item.value ? '#f0f2f5' : 'transparent'
+                        }}
+                        onClick={() => setSelectedCategory(item.value)}
+                      >
+                        <List.Item.Meta
+                          avatar={getCategoryIcon(item.value)}
+                          title={item.label}
+                          description={`${item.count} bài viết`}
+                        />
+                      </List.Item>
+                    )}
+                  />
+                </Card>
+
+                {/* Popular Posts */}
+                <Card title="Bài viết phổ biến" size="small" bordered={false}>
+                  <List
+                    size="small"
+                    dataSource={blogPosts.sort((a, b) => b.views - a.views).slice(0, 5)}
+                    renderItem={(item, index) => (
+                      <List.Item style={{ padding: '8px 0' }}>
+                        <List.Item.Meta
+                          avatar={
+                            <Avatar 
+                              style={{ 
+                                backgroundColor: '#1890ff',
+                                fontSize: '12px' 
+                              }}
+                            >
+                              {index + 1}
+                            </Avatar>
+                          }
+                          title={
+                            <Text 
+                              style={{ fontSize: '13px', cursor: 'pointer' }}
+                              onClick={() => handleReadMore(item)}
+                            >
+                              {item.title}
+                            </Text>
+                          }
+                          description={
+                            <Text type="secondary" style={{ fontSize: '11px' }}>
+                              {item.views} lượt xem
+                            </Text>
+                          }
+                        />
+                      </List.Item>
+                    )}
+                  />
+                </Card>
+
+                {/* Tags */}
+                <Card title="Thẻ phổ biến" size="small" bordered={false}>
+                  <Space wrap>
+                    {['phishing', 'spam', 'bảo mật', 'email', 'lừa đảo', 'mẹo hay', '2FA', 'doanh nghiệp'].map(tag => (
+                      <Tag 
+                        key={tag} 
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => setSearchValue(tag)}
+                      >
+                        {tag}
+                      </Tag>
+                    ))}
+                  </Space>
+                </Card>
+              </Space>
+            </Affix>
+          </Col>
+        </Row>
+      </div>
+    </div>
+  );
+};
+
+export default BlogPage; 
