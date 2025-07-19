@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Layout, Menu, Button, Space } from 'antd';
+import { Layout, Menu, Button, Space, Drawer } from 'antd';
 import { 
   SafetyOutlined, 
   HomeOutlined, 
@@ -8,7 +8,9 @@ import {
   ContactsOutlined,
   BookOutlined,
   DashboardOutlined,
-  SearchOutlined
+  SearchOutlined,
+  MenuOutlined,
+  CloseOutlined
 } from '@ant-design/icons';
 
 const { Header: AntHeader } = Layout;
@@ -16,6 +18,7 @@ const { Header: AntHeader } = Layout;
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const menuItems = [
     {
@@ -53,11 +56,16 @@ const Header = () => {
   const handleMenuClick = (e) => {
     if (e.key.startsWith('/')) {
       navigate(e.key);
+      setMobileMenuOpen(false); // Close mobile menu after navigation
     }
   };
 
   const handleLogoClick = () => {
     navigate('/');
+  };
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
   };
 
   return (
@@ -68,17 +76,46 @@ const Header = () => {
           <span className="logo-text">Watchers Guard</span>
         </div>
         
+        {/* Desktop Menu */}
+        <div className="desktop-menu">
+          <Menu
+            theme="dark"
+            mode="horizontal"
+            selectedKeys={[location.pathname]}
+            items={menuItems}
+            onClick={handleMenuClick}
+            className="nav-menu"
+          />
+        </div>
+
+        {/* Mobile Menu Button */}
+        <div className="mobile-menu-button">
+          <Button
+            type="text"
+            icon={mobileMenuOpen ? <CloseOutlined /> : <MenuOutlined />}
+            onClick={toggleMobileMenu}
+            className="mobile-menu-toggle"
+          />
+        </div>
+      </div>
+
+      {/* Mobile Drawer Menu */}
+      <Drawer
+        title="Menu"
+        placement="right"
+        onClose={() => setMobileMenuOpen(false)}
+        open={mobileMenuOpen}
+        className="mobile-drawer"
+        width={280}
+      >
         <Menu
-          theme="dark"
-          mode="horizontal"
+          mode="vertical"
           selectedKeys={[location.pathname]}
           items={menuItems}
           onClick={handleMenuClick}
-          className="nav-menu"
+          className="mobile-nav-menu"
         />
-        
-     
-      </div>
+      </Drawer>
     </AntHeader>
   );
 };
