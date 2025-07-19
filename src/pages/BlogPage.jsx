@@ -415,7 +415,7 @@ const BlogPage = () => {
   }
 
   return (
-    <div className="blog-page">
+    <div className="page-container blog-page">
       <div className="container">
         <div className="page-header">
           <Title level={1} className="page-title">

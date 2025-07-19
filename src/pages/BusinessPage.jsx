@@ -23,6 +23,7 @@ import {
   TeamOutlined,
   ApiOutlined
 } from '@ant-design/icons';
+import { emailCheckService } from '../services/incomingService';
 
 const { Title, Paragraph, Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -34,6 +35,24 @@ const BusinessPage = () => {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState('7days');
   const [alertVisible, setAlertVisible] = useState(false);
+
+  // State for Email Logs Table
+  const [emailLogs, setEmailLogs] = useState([]);
+  const [pagination, setPagination] = useState({
+    pageIndex: 1,
+    pageSize: 20,
+    total: 0,
+  });
+  const [filters, setFilters] = useState({
+    title: '',
+    from_email: '',
+    to_email: '',
+    category: '',
+  });
+  const [sort, setSort] = useState({
+    column: 'received_time',
+    order: 'descend',
+  });
 
   // Mock data for business dashboard
   const [dashboardData, setDashboardData] = useState({
@@ -47,75 +66,149 @@ const BusinessPage = () => {
     avgResponseTime: 0.3
   });
 
-  const [emailData, setEmailData] = useState([
-    {
-      key: '1',
-      email: 'finance@company.com',
-      sender: 'bank@suspicious.com',
-      subject: 'Urgent: Verify your account now!',
-      classification: 'phishing',
-      riskScore: 95,
-      timestamp: '2025-01-19 14:30:25',
-      action: 'blocked'
-    },
-    {
-      key: '2',
-      email: 'hr@company.com',
-      sender: 'linkedin@notification.com',
-      subject: 'Weekly newsletter',
-      classification: 'safe',
-      riskScore: 5,
-      timestamp: '2025-01-19 14:25:10',
-      action: 'delivered'
-    },
-    {
-      key: '3',
-      email: 'support@company.com',
-      sender: 'promo@marketing.spam',
-      subject: '50% OFF - LIMITED TIME OFFER!!!',
-      classification: 'spam',
-      riskScore: 85,
-      timestamp: '2025-01-19 14:20:45',
-      action: 'quarantined'
-    },
-    {
-      key: '4',
-      email: 'admin@company.com',
-      sender: 'security@company-internal.com',
-      subject: 'Monthly security report',
-      classification: 'safe',
-      riskScore: 8,
-      timestamp: '2025-01-19 14:15:30',
-      action: 'delivered'
-    },
-    {
-      key: '5',
-      email: 'ceo@company.com',
-      sender: 'fake-ceo@similar-domain.co',
-      subject: 'RE: Wire transfer authorization',
-      classification: 'phishing',
-      riskScore: 98,
-      timestamp: '2025-01-19 14:10:15',
-      action: 'blocked'
+  // Fetch Email Logs from API
+  const fetchEmails = async (
+    currentPagination = pagination,
+    currentFilters = filters,
+    currentSort = sort
+  ) => {
+    setLoading(true);
+    try {
+      const requestBody = {
+        pageIndex: currentPagination.pageIndex, // Send pageIndex as is (1-based)
+        pageSize: currentPagination.pageSize,
+        sortColumn: currentSort.column,
+        sortOrder: currentSort.order === 'ascend' ? 'asc' : 'desc',
+      };
+
+      // Conditionally add filters if they have a value
+      if (currentFilters.title) {
+        requestBody.title = currentFilters.title;
+      }
+      if (currentFilters.from_email) {
+        requestBody.from_email = currentFilters.from_email;
+      }
+      if (currentFilters.to_email) {
+        requestBody.to_email = currentFilters.to_email;
+      }
+      if (currentFilters.category) {
+        requestBody.category = currentFilters.category;
+      }
+
+      const response = await emailCheckService.getDataSearch(requestBody);
+      if (response.status && response.data) {
+        setEmailLogs(response.data.items.map((item, index) => ({ ...item, key: item.id || index })));
+        setPagination(prev => ({
+          ...prev,
+          total: response.data.totalCount,
+        }));
+      } else {
+        console.error('API Error:', response.message);
+        setEmailLogs([]);
+        setPagination(prev => ({ ...prev, total: 0 }));
+      }
+    } catch (error) {
+      console.error('Error fetching email logs:', error);
+      setEmailLogs([]);
+      setPagination(prev => ({ ...prev, total: 0 }));
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
+
+  // Search function - doesn't include pageIndex, resets to page 1
+  const handleSearch = async () => {
+    setLoading(true);
+    try {
+      const requestBody = {
+        pageSize: pagination.pageSize,
+        sortColumn: sort.column,
+        sortOrder: sort.order === 'ascend' ? 'asc' : 'desc',
+      };
+
+      // Conditionally add filters if they have a value
+      if (filters.title) {
+        requestBody.title = filters.title;
+      }
+      if (filters.from_email) {
+        requestBody.from_email = filters.from_email;
+      }
+      if (filters.to_email) {
+        requestBody.to_email = filters.to_email;
+      }
+      if (filters.category) {
+        requestBody.category = filters.category;
+      }
+
+      const response = await emailCheckService.getDataSearch(requestBody);
+      if (response.status && response.data) {
+        setEmailLogs(response.data.items.map((item, index) => ({ ...item, key: item.id || index })));
+        setPagination({
+          pageIndex: 1, // Reset to first page
+          pageSize: pagination.pageSize,
+          total: response.data.totalCount,
+        });
+      } else {
+        console.error('API Error:', response.message);
+        setEmailLogs([]);
+        setPagination(prev => ({ ...prev, pageIndex: 1, total: 0 }));
+      }
+    } catch (error) {
+      console.error('Error fetching email logs:', error);
+      setEmailLogs([]);
+      setPagination(prev => ({ ...prev, pageIndex: 1, total: 0 }));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEmails(pagination, filters, sort);
+  }, [pagination.pageIndex, pagination.pageSize, filters, sort]);
+
+  // Handle table change (pagination, sort, filter)
+  const handleTableChange = (newPagination, tableFilters, newSorter) => {
+    setPagination({
+      pageIndex: newPagination.current,
+      pageSize: newPagination.pageSize,
+      total: newPagination.total,
+    });
+
+    // Handle sorting
+    const newSortColumn = newSorter.columnKey || sort.column; // Use new columnKey if available, otherwise keep current
+    const newSortOrder = newSorter.order || sort.order; // Use new order if available, otherwise keep current
+
+    if (newSortColumn !== sort.column || newSortOrder !== sort.order) {
+      setSort({
+        column: newSortColumn,
+        order: newSortOrder,
+      });
+    }
+
+    // Handle column filters for category
+    // tableFilters.category will be an array like ['An Toàn'] or undefined
+    const selectedCategoryFilter = tableFilters.category ? tableFilters.category[0] : '';
+    if (selectedCategoryFilter !== filters.category) {
+      setFilters(prev => ({ ...prev, category: selectedCategoryFilter }));
+    }
+  };
 
   const getClassificationColor = (classification) => {
     switch (classification) {
-      case 'safe': return 'green';
-      case 'suspicious': return 'orange';
-      case 'spam': return 'red';
-      case 'phishing': return 'volcano';
+      case 'An Toàn': return 'green';
+      case 'Nghi ngờ': return 'orange';
+      case 'Spam': return 'red';
+      case 'Giả mạo': return 'volcano';
       default: return 'default';
     }
   };
 
   const getClassificationIcon = (classification) => {
     switch (classification) {
-      case 'safe': return <SafetyOutlined />;
-      case 'suspicious': return <ExclamationCircleOutlined />;
-      case 'spam': return <FireOutlined />;
-      case 'phishing': return <ExclamationCircleOutlined />;
+      case 'An Toàn': return <SafetyOutlined />;
+      case 'Nghi ngờ': return <ExclamationCircleOutlined />;
+      case 'Spam': return <FireOutlined />;
+      case 'Giả mạo': return <ExclamationCircleOutlined />;
       default: return <MailOutlined />;
     }
   };
@@ -132,10 +225,10 @@ const BusinessPage = () => {
   const columns = [
     {
       title: 'Thời gian',
-      dataIndex: 'timestamp',
-      key: 'timestamp',
+      dataIndex: 'received_time',
+      key: 'received_time',
       width: 150,
-      sorter: (a, b) => new Date(a.timestamp) - new Date(b.timestamp),
+      sorter: true,
       render: (text) => (
         <Text type="secondary" style={{ fontSize: '12px' }}>
           {new Date(text).toLocaleString('vi-VN')}
@@ -143,21 +236,9 @@ const BusinessPage = () => {
       )
     },
     {
-      title: 'Người nhận',
-      dataIndex: 'email',
-      key: 'email',
-      render: (text) => <Text strong>{text}</Text>
-    },
-    {
-      title: 'Người gửi',
-      dataIndex: 'sender',
-      key: 'sender',
-      render: (text) => <Text code>{text}</Text>
-    },
-    {
       title: 'Tiêu đề',
-      dataIndex: 'subject',
-      key: 'subject',
+      dataIndex: 'title',
+      key: 'title',
       ellipsis: true,
       render: (text) => (
         <Tooltip title={text}>
@@ -166,35 +247,66 @@ const BusinessPage = () => {
       )
     },
     {
+      title: 'Người gửi',
+      dataIndex: 'from_email',
+      key: 'from_email',
+      render: (text) => <Text code>{text}</Text>
+    },
+    {
+      title: 'Người nhận',
+      dataIndex: 'to_email',
+      key: 'to_email',
+      render: (text) => <Text strong>{text}</Text>
+    },
+    {
       title: 'Phân loại',
-      dataIndex: 'classification',
-      key: 'classification',
+      dataIndex: 'category',
+      key: 'category',
       width: 120,
       filters: [
-        { text: 'An toàn', value: 'safe' },
-        { text: 'Nghi ngờ', value: 'suspicious' },
-        { text: 'Spam', value: 'spam' },
-        { text: 'Phishing', value: 'phishing' }
+        { text: 'An Toàn', value: 'An Toàn' },
+        { text: 'Nghi ngờ', value: 'Nghi ngờ' },
+        { text: 'Spam', value: 'Spam' },
+        { text: 'Giả mạo', value: 'Giả mạo' }
       ],
-      onFilter: (value, record) => record.classification === value,
-      render: (classification) => (
+      onFilter: (value, record) => record.category === value,
+      render: (category) => (
         <Tag 
-          color={getClassificationColor(classification)} 
-          icon={getClassificationIcon(classification)}
+          color={getClassificationColor(category)} 
+          icon={getClassificationIcon(category)}
         >
-          {classification === 'safe' && 'An toàn'}
-          {classification === 'suspicious' && 'Nghi ngờ'}
-          {classification === 'spam' && 'Spam'}
-          {classification === 'phishing' && 'Phishing'}
+          {category}
         </Tag>
       )
+    },
+    {
+      title: 'Chỉ số đáng ngờ',
+      dataIndex: 'suspicious_indicators',
+      key: 'suspicious_indicators',
+      ellipsis: true,
+      render: (indicators) => {
+        try {
+          const parsedIndicators = JSON.parse(indicators);
+          return (
+            <Space wrap>
+              {parsedIndicators.map((indicator, index) => (
+                <Tag key={index} color="orange">
+                  {indicator}
+                </Tag>
+              ))}
+            </Space>
+          );
+        } catch (e) {
+          return <Text type="secondary">N/A</Text>;
+        }
+      }
     },
     {
       title: 'Điểm rủi ro',
       dataIndex: 'riskScore',
       key: 'riskScore',
       width: 120,
-      sorter: (a, b) => a.riskScore - b.riskScore,
+      sorter: true,
       render: (score) => (
         <div style={{ width: 80 }}>
           <Progress
@@ -245,11 +357,8 @@ const BusinessPage = () => {
   ];
 
   const handleRefresh = () => {
-    setLoading(true);
-    setTimeout(() => {
-      // Simulate data refresh
-      setLoading(false);
-    }, 1000);
+    // Re-fetch data on refresh
+    fetchEmails(pagination, filters, sort);
   };
 
   const handleExport = () => {
@@ -409,15 +518,16 @@ const BusinessPage = () => {
   );
 
   return (
-    <div className="business-page" style={{ paddingTop: '80px' }}>
-      <div className="container" style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px' }}>
-        <div className="page-header" style={{ marginBottom: '24px' }}>
+
+    <div className="page-container business-page">
+      <div className="container">
+        <div className="page-header">
           <Row justify="space-between" align="middle">
             <Col>
-              <Title level={1} className="page-title" style={{ marginBottom: '8px' }}>
+              <Title level={1} className="page-title">
                 <DashboardOutlined /> Dashboard Doanh nghiệp
               </Title>
-              <Paragraph className="page-description" style={{ marginBottom: '0', color: '#666' }}>
+              <Paragraph className="page-description">
                 Giám sát và quản lý an toàn email cho tổ chức của bạn
               </Paragraph>
             </Col>
@@ -461,7 +571,6 @@ const BusinessPage = () => {
                 Xem chi tiết
               </Button>
             }
-            style={{ marginBottom: 24 }}
           />
         )}
 
@@ -479,26 +588,61 @@ const BusinessPage = () => {
               bordered={false}
               extra={
                 <Space>
+                  <Input
+                    placeholder="Tìm kiếm theo tiêu đề..."
+                    value={filters.title}
+                    onChange={(e) => setFilters(prev => ({ ...prev, title: e.target.value }))}
+                    style={{ width: 200 }}
+                  />
+                  <Input
+                    placeholder="Tìm kiếm theo người gửi..."
+                    value={filters.from_email}
+                    onChange={(e) => setFilters(prev => ({ ...prev, from_email: e.target.value }))}
+                    style={{ width: 200 }}
+                  />
+                  <Input
+                    placeholder="Tìm kiếm theo người nhận..."
+                    value={filters.to_email}
+                    onChange={(e) => setFilters(prev => ({ ...prev, to_email: e.target.value }))}
+                    style={{ width: 200 }}
+                  />
                   <Select
-                    value={selectedPeriod}
-                    onChange={setSelectedPeriod}
-                    style={{ width: 120 }}
+                    placeholder="Lọc theo phân loại"
+                    value={filters.category}
+                    onChange={(value) => setFilters(prev => ({ ...prev, category: value }))}
+                    style={{ width: 180 }}
+                    allowClear
                   >
-                    <Option value="1day">Hôm nay</Option>
-                    <Option value="7days">7 ngày</Option>
-                    <Option value="30days">30 ngày</Option>
+                    <Option value="An Toàn">An Toàn</Option>
+                    <Option value="Nghi ngờ">Nghi ngờ</Option>
+                    <Option value="Spam">Spam</Option>
+                    <Option value="Giả mạo">Giả mạo</Option>
                   </Select>
-                  <RangePicker size="middle" />
-                  <Button icon={<FilterOutlined />}>Lọc</Button>
+                  <Button 
+                    type="primary" 
+                    icon={<SearchOutlined />} 
+                    onClick={handleSearch}
+                  >
+                    Tìm kiếm
+                  </Button>
+                  <Button icon={<FilterOutlined />} onClick={() => {
+                    setFilters({ title: '', from_email: '', to_email: '', category: '' });
+                    setPagination(prev => ({ ...prev, pageIndex: 1 }));
+                    setSort({ column: 'received_time', order: 'descend' });
+                  }}>
+                    Xóa bộ lọc
+                  </Button>
                 </Space>
               }
             >
               <Table
                 columns={columns}
-                dataSource={emailData}
+                dataSource={emailLogs}
                 loading={loading}
                 pagination={{
-                  pageSize: 10,
+                  current: pagination.pageIndex,
+                  pageSize: pagination.pageSize,
+                  total: pagination.total,
                   showSizeChanger: true,
                   showQuickJumper: true,
                   showTotal: (total, range) => 
@@ -506,6 +650,7 @@ const BusinessPage = () => {
                 }}
                 scroll={{ x: 1200 }}
                 size="small"
+                onChange={handleTableChange}
               />
             </Card>
           </TabPane>

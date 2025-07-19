@@ -8,6 +8,8 @@ import HomePage from './pages/HomePage';
 import CheckPage from './pages/CheckPage';
 import BusinessPage from './pages/BusinessPage';
 import BlogPage from './pages/BlogPage';
+import AICheck from './pages/AICheck';
+import IntroductionPage from './pages/IntroductionPage';
 import './styles/App.css';
 
 const { Content } = Layout;
@@ -24,6 +26,8 @@ function App() {
               <Route path="/check" element={<CheckPage />} />
               <Route path="/business" element={<BusinessPage />} />
               <Route path="/blog" element={<BlogPage />} />
+              <Route path="/AIcheck" element={<AICheck />} />
+              <Route path="/Introduction" element={<IntroductionPage />} />
               <Route path="*" element={<HomePage />} />
             </Routes>
           </Content>

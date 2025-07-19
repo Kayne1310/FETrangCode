@@ -37,16 +37,16 @@ const Header = () => {
       key: '/blog',
       icon: <BookOutlined />,
       label: 'Blog',
+    },  
+    {
+      key: '/AIcheck',
+      icon: <BookOutlined />,
+      label: 'AI Check',  
     },
     {
-      key: 'about',
+      key: '/Introduction',
       icon: <InfoCircleOutlined />,
       label: 'Giới thiệu',
-    },
-    {
-      key: 'contact',
-      icon: <ContactsOutlined />,
-      label: 'Liên hệ',
     },
   ];
 
