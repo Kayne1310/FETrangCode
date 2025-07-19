@@ -11,6 +11,7 @@ import {
   CheckCircleOutlined
 } from '@ant-design/icons';
 import { getEducationContent } from '../services/emailService';
+import { useNavigate } from 'react-router-dom';
 
 const { Title, Paragraph } = Typography;
 const { Panel } = Collapse;
@@ -18,6 +19,7 @@ const { Panel } = Collapse;
 const EducationSection = () => {
   const [content, setContent] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchEducationContent = async () => {
@@ -166,7 +168,18 @@ const EducationSection = () => {
                   bordered={false} 
                   hoverable
                   actions={[
-                    <Button type="link" icon={<EyeOutlined />}>
+                    <Button 
+                      type="link" 
+                      icon={<EyeOutlined />}
+                      onClick={() => {
+                        const lessonRoutes = {
+                          1: '/lesson/phishing',
+                          2: '/lesson/security', 
+                          3: '/lesson/spam'
+                        };
+                        navigate(lessonRoutes[article.id]);
+                      }}
+                    >
                       Đọc thêm
                     </Button>
                   ]}

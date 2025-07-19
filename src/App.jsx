@@ -10,6 +10,9 @@ import BusinessPage from './pages/BusinessPage';
 import BlogPage from './pages/BlogPage';
 import AICheck from './pages/AICheck';
 import IntroductionPage from './pages/IntroductionPage';
+import PhishingLessonPage from './pages/PhishingLessonPage';
+import SecurityLessonPage from './pages/SecurityLessonPage';
+import SpamLessonPage from './pages/SpamLessonPage';
 import './styles/App.css';
 
 const { Content } = Layout;
@@ -30,6 +33,9 @@ function App() {
               <Route path="/blog" element={<BlogPage />} />
               <Route path="/AIcheck" element={<AICheck />} />
               <Route path="/Introduction" element={<IntroductionPage />} />
+              <Route path="/lesson/phishing" element={<PhishingLessonPage />} />
+              <Route path="/lesson/security" element={<SecurityLessonPage />} />
+              <Route path="/lesson/spam" element={<SpamLessonPage />} />
               <Route path="*" element={<HomePage />} />
             </Routes>
           </Content>

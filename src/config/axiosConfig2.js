@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // Cấu hình mặc định cho axios
 const defaultConfig = {
-  baseURL: import.meta.env.VITE_API_URL2 || 'http://localhost:5001/predict',
+  baseURL: import.meta.env.VITE_API_URL2 || 'https://watchers-ai.btecit.tech/predict',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
