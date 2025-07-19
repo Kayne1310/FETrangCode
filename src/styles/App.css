@@ -1000,29 +1000,89 @@ html, body {
   font-weight: 700 !important;
 }
 
+/* Business Page Table Improvements */
+.business-page .ant-table {
+  font-size: 12px;
+}
+
 .business-page .ant-table-thead > tr > th {
   background: #fafafa;
   font-weight: 600;
   font-size: 12px;
   text-transform: uppercase;
+  padding: 8px 12px;
+}
+
+.business-page .ant-table-tbody > tr > td {
+  padding: 8px 12px;
+  vertical-align: top;
 }
 
 .business-page .ant-table-tbody > tr:hover > td {
   background: #f5f5f5;
 }
 
-.business-page .ant-tag {
+/* Suspicious Indicators Column */
+.business-page .ant-table-tbody .ant-tag {
   font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 12px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  line-height: 16px;
+  margin: 1px 2px;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
 }
 
-.business-page .ant-badge-status-text {
-  font-size: 12px;
+/* Risk Score Column */
+.business-page .ant-progress {
+  margin: 0;
+}
+
+.business-page .ant-progress-text {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  line-height: 1;
 }
 
 .business-page .ant-progress-inner {
   background-color: #f5f5f5;
+}
+
+/* Badge and Status */
+.business-page .ant-badge-status-text {
+  font-size: 12px;
+}
+
+/* Table Responsive */
+.business-page .ant-table-wrapper {
+  overflow-x: auto;
+}
+
+.business-page .ant-table-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Fix column widths on mobile */
+@media (max-width: 768px) {
+  .business-page .ant-table-thead > tr > th,
+  .business-page .ant-table-tbody > tr > td {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+  
+  .business-page .ant-table-tbody .ant-tag {
+    font-size: 10px;
+    padding: 1px 4px;
+    max-width: 80px;
+  }
+  
+  .business-page .ant-progress-text {
+    font-size: 10px !important;
+  }
 }
 
 /* Blog Page Styles */

@@ -65,7 +65,7 @@ const Header = () => {
       <div className="header-container">
         <div className="logo" onClick={handleLogoClick} style={{ cursor: 'pointer' }}>
           <SafetyOutlined className="logo-icon" />
-          <span className="logo-text">SafeMail Guard</span>
+          <span className="logo-text">Watchers Guard</span>
         </div>
         
         <Menu

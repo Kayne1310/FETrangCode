@@ -26,7 +26,7 @@ const Footer = () => {
             <div className="footer-brand">
               <div className="footer-logo">
                 <SafetyOutlined className="footer-logo-icon" />
-                <span className="footer-logo-text">SafeMail Guard</span>
+                <span className="footer-logo-text">Watchers Guard</span>
               </div>
               
               <Paragraph className="footer-description">
