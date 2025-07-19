@@ -301,10 +301,20 @@ const BlogPage = () => {
 
   const handleReadMore = (post) => {
     setSelectedPost(post);
+    // Scroll to top khi mở blog post detail
+    window.scrollTo({ 
+      top: 0, 
+      behavior: 'smooth' 
+    });
   };
 
   const handleBackToList = () => {
     setSelectedPost(null);
+    // Scroll to top khi quay lại danh sách
+    window.scrollTo({ 
+      top: 0, 
+      behavior: 'smooth' 
+    });
   };
 
   if (selectedPost) {
@@ -400,7 +410,7 @@ const BlogPage = () => {
             </Col>
 
             <Col xs={24} lg={6}>
-              <Affix offsetTop={24}>
+              <div style={{ position: 'sticky', top: '50px' }}>
                 <Space direction="vertical" size="large" style={{ width: '100%' }}>
                   <Card size="small" title="Mục lục" bordered={false}>
                     <Anchor>
@@ -447,7 +457,7 @@ const BlogPage = () => {
                     />
                   </Card>
                 </Space>
-              </Affix>
+              </div>
             </Col>
           </Row>
         </div>
@@ -721,7 +731,7 @@ const BlogPage = () => {
 
           {/* Sidebar */}
           <Col xs={24} lg={6}>
-            <Affix offsetTop={24}>
+            <div style={{ position: 'sticky', top: '100px' }}>
               <Space direction="vertical" size="large" style={{ width: '100%' }}>
                 {/* Categories */}
                 <Card title="Chuyên mục" size="small" bordered={false}>
@@ -798,9 +808,9 @@ const BlogPage = () => {
                     ))}
                   </Space>
                 </Card>
-              </Space>
-            </Affix>
-          </Col>
+                </Space>
+              </div>
+           </Col>
         </Row>
       </div>
     </div>

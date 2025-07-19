@@ -8,7 +8,8 @@ import {
   ContactsOutlined,
   BookOutlined,
   DashboardOutlined,
-  SearchOutlined
+  SearchOutlined,
+  RobotOutlined
 } from '@ant-design/icons';
 
 const { Header: AntHeader } = Layout;
@@ -40,7 +41,7 @@ const Header = () => {
     },  
     {
       key: '/AIcheck',
-      icon: <BookOutlined />,
+      icon: <RobotOutlined />,
       label: 'AI Check',  
     },
     {
