@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   Row, Col, Card, Typography, Input, Button, Select, 
   Alert, Spin, Result, Progress, Tag, Space, Divider, 
-  List, Avatar, Tabs, Statistic, Timeline
+  List, Avatar, Tabs, Statistic, Timeline, Modal, Descriptions
 } from 'antd';
 import { 
   SearchOutlined,
@@ -17,9 +17,15 @@ import {
   HistoryOutlined,
   DeleteOutlined,
   EyeOutlined,
-  ClockCircleOutlined
+  ClockCircleOutlined,
+  InfoCircleOutlined,
+  WarningOutlined,
+  StopOutlined,
+  RobotOutlined,
+  BarChartOutlined,
+  SettingOutlined
 } from '@ant-design/icons';
-import { checkEmailSafety } from '../services/emailService';
+import checkService from '../services/checkService';
 
 const { Title, Paragraph, Text } = Typography;
 const { TextArea } = Input;
@@ -31,6 +37,8 @@ const CheckPage = () => {
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalResult, setModalResult] = useState(null);
   const [history, setHistory] = useState([
     {
       id: 1,
@@ -62,25 +70,40 @@ const CheckPage = () => {
     
     setLoading(true);
     try {
-      const response = await checkEmailSafety({
-        type: checkType,
-        value: inputValue
-      });
+      console.log('🔍 Starting check:', { type: checkType, value: inputValue });
+      const response = await checkService.performCheck(checkType, inputValue);
+      console.log('📊 Check response:', response);
       
-      // Add to history
-      const newHistoryItem = {
-        id: Date.now(),
-        type: checkType,
-        value: inputValue,
-        result: response.classification,
-        timestamp: new Date().toISOString(),
-        riskScore: response.riskScore
-      };
-      setHistory([newHistoryItem, ...history]);
-      
-      setResult(response);
+      if (response.success) {
+        console.log('✅ Analysis data:', response.data);
+        
+        // Add to history
+        const newHistoryItem = {
+          id: Date.now(),
+          type: checkType,
+          value: inputValue,
+          result: response.data.classification,
+          timestamp: new Date().toISOString(),
+          riskScore: response.data.riskScore,
+          confidence: response.data.confidence,
+          aiEnhanced: response.data.aiEnhanced
+        };
+        setHistory([newHistoryItem, ...history]);
+        
+        // Show result in modal
+        console.log('🚀 Setting modal data:', response.data);
+        setModalResult(response.data);
+        setModalVisible(true);
+        setResult(response.data);
+      } else {
+        console.error('❌ Check failed:', response.error);
+        setResult({
+          status: 'error',
+          message: response.error || 'Có lỗi xảy ra khi kiểm tra. Vui lòng thử lại.'
+        });
+      }
     } catch (error) {
-      console.error('Error checking:', error);
+      console.error('💥 Error checking:', error);
       setResult({
         status: 'error',
         message: 'Có lỗi xảy ra khi kiểm tra. Vui lòng thử lại.'
@@ -164,6 +187,12 @@ const CheckPage = () => {
           onClick={() => { setCheckType('content'); setInputValue('URGENT! Click now to win $1000!'); }}
         >
           Test Nội dung Spam
+        </Button>
+        <Button 
+          block 
+          onClick={() => { setCheckType('content'); setInputValue('bấm vào đây để nhận 10 triệu'); }}
+        >
+          Test Nội dung Lừa đảo
         </Button>
       </Space>
     </Card>
@@ -325,6 +354,11 @@ const CheckPage = () => {
                     <Tag color={getStatusColor(item.result)}>
                       {getStatusText(item.result)}
                     </Tag>
+                    {item.aiEnhanced && (
+                      <Tag color="blue" size="small" icon={<RobotOutlined />}>
+                        AI
+                      </Tag>
+                    )}
                   </Space>
                 }
                 description={
@@ -335,6 +369,12 @@ const CheckPage = () => {
                     </Text>
                     <Divider type="vertical" />
                     <Text>Điểm rủi ro: {item.riskScore}/100</Text>
+                    {item.confidence && (
+                      <>
+                        <Divider type="vertical" />
+                        <Text>Độ tin cậy: {item.confidence}%</Text>
+                      </>
+                    )}
                   </Space>
                 }
               />
@@ -344,6 +384,422 @@ const CheckPage = () => {
       )}
     </Card>
   );
+
+  const renderResultModal = () => {
+    if (!modalResult) return null;
+
+    console.log('🎨 Hiển thị modal với dữ liệu:', modalResult);
+
+    const getStatusColor = (classification) => {
+      switch (classification) {
+        case 'safe': return '#52c41a';
+        case 'suspicious': return '#faad14';
+        case 'spam': return '#fa8c16';
+        case 'phishing': return '#f5222d';
+        default: return '#d9d9d9';
+      }
+    };
+
+    const getStatusIcon = (classification) => {
+      switch (classification) {
+        case 'safe': return <CheckCircleOutlined style={{ color: '#52c41a', fontSize: '32px' }} />;
+        case 'suspicious': return <ExclamationCircleOutlined style={{ color: '#faad14', fontSize: '32px' }} />;
+        case 'spam': return <StopOutlined style={{ color: '#fa8c16', fontSize: '32px' }} />;
+        case 'phishing': return <CloseCircleOutlined style={{ color: '#f5222d', fontSize: '32px' }} />;
+        default: return <InfoCircleOutlined style={{ fontSize: '32px' }} />;
+      }
+    };
+
+    const getStatusText = (classification) => {
+      switch (classification) {
+        case 'safe': return 'An Toàn';
+        case 'suspicious': return 'Nghi Ngờ';
+        case 'spam': return 'Thư Rác';
+        case 'phishing': return 'Lừa Đảo';
+        default: return 'Chưa Xác Định';
+      }
+    };
+
+    const getRiskLevelText = (score) => {
+      if (score >= 80) return 'Rất Cao';
+      if (score >= 60) return 'Cao';
+      if (score >= 40) return 'Trung Bình';
+      if (score >= 20) return 'Thấp';
+      return 'Rất Thấp';
+    };
+
+    const getConfidenceText = (confidence) => {
+      if (confidence >= 80) return 'Rất Tin Cậy';
+      if (confidence >= 60) return 'Tin Cậy';
+      if (confidence >= 40) return 'Khá Tin Cậy';
+      if (confidence >= 20) return 'Ít Tin Cậy';
+      return 'Không Tin Cậy';
+    };
+
+    return (
+      <Modal
+        title={
+          <div style={{ textAlign: 'center', padding: '10px 0' }}>
+            <Space direction="vertical" size="small">
+              <Space size="middle">
+                <SafetyOutlined style={{ fontSize: '20px', color: '#1890ff' }} />
+                <span style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  Kết Quả Phân Tích Bảo Mật
+                </span>
+              </Space>
+              {modalResult.aiEnhanced && (
+                <Tag color="blue" icon={<RobotOutlined />} style={{ fontSize: '12px' }}>
+                  Được Tăng Cường Bởi Gemini AI
+                </Tag>
+              )}
+            </Space>
+          </div>
+        }
+        open={modalVisible}
+        onCancel={() => setModalVisible(false)}
+        footer={[
+          <Button key="close" size="large" onClick={() => setModalVisible(false)}>
+            Đóng
+          </Button>,
+          <Button 
+            key="check-again" 
+            type="primary" 
+            size="large"
+            onClick={() => {
+              setModalVisible(false);
+              setInputValue('');
+            }}
+          >
+            Kiểm Tra Mới
+          </Button>
+        ]}
+        width={800}
+        centered
+      >
+        <div style={{ padding: '20px 0' }}>
+          {/* Kết Quả Chính */}
+          <div style={{ 
+            textAlign: 'center', 
+            background: 'linear-gradient(135deg, #f6f9fc 0%, #e9f4ff 100%)',
+            borderRadius: '12px',
+            padding: '30px 20px',
+            marginBottom: '24px',
+            border: `2px solid ${getStatusColor(modalResult.classification)}20`
+          }}>
+            <Space direction="vertical" size="large">
+              {getStatusIcon(modalResult.classification)}
+              <div>
+                <Title level={2} style={{ 
+                  margin: 0, 
+                  color: getStatusColor(modalResult.classification),
+                  fontSize: '28px'
+                }}>
+                  {getStatusText(modalResult.classification)}
+                </Title>
+                <Text style={{ 
+                  fontSize: '16px', 
+                  color: '#666',
+                  display: 'block',
+                  marginTop: '8px'
+                }}>
+                  {modalResult.description || 'Quá trình phân tích đã hoàn tất thành công'}
+                </Text>
+              </div>
+              {modalResult.aiEnhanced && (
+                <div style={{
+                  background: 'linear-gradient(45deg, #1890ff, #722ed1)',
+                  color: 'white',
+                  padding: '8px 16px',
+                  borderRadius: '20px',
+                  fontSize: '13px',
+                  fontWeight: 'bold'
+                }}>
+                  <RobotOutlined style={{ marginRight: '6px' }} />
+                  Phân Tích Bằng Trí Tuệ Nhân Tạo
+                </div>
+              )}
+            </Space>
+          </div>
+
+          {/* Thông Tin Đầu Vào */}
+          <Card 
+            size="small" 
+            title={<span><FileTextOutlined /> Thông Tin Kiểm Tra</span>}
+            style={{ marginBottom: '16px' }}
+          >
+            <Descriptions column={1} size="small">
+              <Descriptions.Item 
+                label={<span style={{ fontWeight: 'bold' }}>Nội dung</span>}
+              >
+                <div style={{
+                  background: '#f5f5f5',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  fontFamily: 'monospace',
+                  fontSize: '13px',
+                  wordBreak: 'break-all',
+                  border: '1px solid #d9d9d9'
+                }}>
+                  {inputValue}
+                </div>
+              </Descriptions.Item>
+              <Descriptions.Item 
+                label={<span style={{ fontWeight: 'bold' }}>Loại kiểm tra</span>}
+              >
+                <Tag color="blue" style={{ fontSize: '12px' }}>
+                  {checkType === 'email' ? 'Địa Chỉ Email' : 
+                   checkType === 'link' ? 'Liên Kết Website' :
+                   checkType === 'phone' ? 'Số Điện Thoại' : 'Nội Dung Email'}
+                </Tag>
+              </Descriptions.Item>
+            </Descriptions>
+          </Card>
+
+          {/* Chỉ Số Rủi Ro */}
+          <Card 
+            size="small" 
+            title={<span><BarChartOutlined /> Đánh Giá Rủi Ro</span>}
+            style={{ marginBottom: '16px' }}
+          >
+            <Row gutter={[16, 16]}>
+              <Col span={8}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '24px', fontWeight: 'bold', color: getStatusColor(modalResult.classification) }}>
+                    {modalResult.riskScore || 0}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#999', marginBottom: '8px' }}>
+                    Điểm Rủi Ro (0-100)
+                  </div>
+                  <Progress
+                    percent={modalResult.riskScore || 0}
+                    strokeColor={getStatusColor(modalResult.classification)}
+                    size="small"
+                    format={() => ''}
+                  />
+                  <div style={{ fontSize: '11px', color: '#666', marginTop: '4px' }}>
+                    {getRiskLevelText(modalResult.riskScore || 0)}
+                  </div>
+                </div>
+              </Col>
+              <Col span={8}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#1890ff' }}>
+                    {100 - (modalResult.riskScore || 0)}%
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#999', marginBottom: '8px' }}>
+                    Độ Tin Cậy
+                  </div>
+                  <Progress
+                    percent={100 - (modalResult.riskScore || 0)}
+                    strokeColor="#1890ff"
+                    size="small"
+                    format={() => ''}
+                  />
+                  <div style={{ fontSize: '11px', color: '#666', marginTop: '4px' }}>
+                    {getConfidenceText(100 - (modalResult.riskScore || 0))}
+                  </div>
+                </div>
+              </Col>
+              <Col span={8}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ 
+                    fontSize: '24px', 
+                    fontWeight: 'bold', 
+                    color: modalResult.threats?.length > 0 ? '#f5222d' : '#52c41a' 
+                  }}>
+                    {modalResult.threats?.length || 0}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#999', marginBottom: '8px' }}>
+                    Mối Đe Dọa
+                  </div>
+                  <div style={{ 
+                    background: modalResult.threats?.length > 0 ? '#fff2f0' : '#f6ffed',
+                    border: modalResult.threats?.length > 0 ? '1px solid #ffccc7' : '1px solid #b7eb8f',
+                    borderRadius: '4px',
+                    padding: '4px 8px',
+                    fontSize: '11px',
+                    color: modalResult.threats?.length > 0 ? '#f5222d' : '#52c41a'
+                  }}>
+                    {modalResult.threats?.length > 0 ? 'Phát Hiện' : 'Không Có'}
+                  </div>
+                </div>
+              </Col>
+            </Row>
+          </Card>
+
+          {/* Mối Đe Dọa Phát Hiện */}
+          {modalResult.threats && modalResult.threats.length > 0 && (
+            <Card 
+              size="small" 
+              title={
+                <span>
+                  <WarningOutlined style={{ color: '#f5222d' }} /> 
+                  Mối Đe Dọa Phát Hiện ({modalResult.threats.length})
+                </span>
+              }
+              style={{ marginBottom: '16px' }}
+            >
+              <List
+                size="small"
+                dataSource={modalResult.threats}
+                renderItem={(threat, index) => (
+                  <List.Item style={{ 
+                    background: '#fff7e6', 
+                    margin: '4px 0', 
+                    borderRadius: '6px',
+                    border: '1px solid #ffd591',
+                    padding: '12px'
+                  }}>
+                    <List.Item.Meta
+                      avatar={
+                        <div style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '50%',
+                          background: threat.severity === 'high' ? '#f5222d' : 
+                                     threat.severity === 'medium' ? '#fa8c16' : '#faad14',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: 'white',
+                          fontSize: '14px'
+                        }}>
+                          {threat.severity === 'high' ? <WarningOutlined /> :
+                           threat.severity === 'medium' ? <ExclamationCircleOutlined /> : <InfoCircleOutlined />}
+                        </div>
+                      }
+                      title={
+                        <div>
+                          <Text strong style={{ fontSize: '14px' }}>
+                            {threat.name}
+                          </Text>
+                          <Tag 
+                            color={
+                              threat.severity === 'high' ? 'red' : 
+                              threat.severity === 'medium' ? 'orange' : 'gold'
+                            }
+                            size="small"
+                            style={{ marginLeft: '8px' }}
+                          >
+                            {threat.severity === 'high' ? 'Mức Độ Cao' : 
+                             threat.severity === 'medium' ? 'Mức Độ Trung Bình' : 'Mức Độ Thấp'}
+                          </Tag>
+                        </div>
+                      }
+                      description={
+                        <Text style={{ fontSize: '13px', color: '#666' }}>
+                          {threat.description}
+                        </Text>
+                      }
+                    />
+                  </List.Item>
+                )}
+              />
+            </Card>
+          )}
+
+          {/* Khuyến Nghị */}
+          {modalResult.recommendations && modalResult.recommendations.length > 0 && (
+            <Card 
+              size="small" 
+              title={
+                <span>
+                  <CheckCircleOutlined style={{ color: '#52c41a' }} /> 
+                  Khuyến Nghị Bảo Mật ({modalResult.recommendations.length})
+                </span>
+              }
+              style={{ marginBottom: '16px' }}
+            >
+              <List
+                size="small"
+                dataSource={modalResult.recommendations}
+                renderItem={(recommendation, index) => (
+                  <List.Item style={{ 
+                    background: '#f6ffed', 
+                    margin: '4px 0', 
+                    borderRadius: '6px',
+                    border: '1px solid #b7eb8f',
+                    padding: '12px'
+                  }}>
+                    <Space align="start">
+                      <div style={{
+                        width: '20px',
+                        height: '20px',
+                        borderRadius: '50%',
+                        background: '#52c41a',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontSize: '12px',
+                        flexShrink: 0
+                      }}>
+                        {index + 1}
+                      </div>
+                      <Text style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                        {recommendation}
+                      </Text>
+                    </Space>
+                  </List.Item>
+                )}
+              />
+            </Card>
+          )}
+
+          {/* Thông Tin Kỹ Thuật */}
+          <Card 
+            size="small" 
+            title={<span><SettingOutlined /> Thông Tin Kỹ Thuật</span>}
+          >
+            <Row gutter={[16, 8]}>
+              <Col span={12}>
+                <div style={{ padding: '8px', background: '#fafafa', borderRadius: '4px' }}>
+                  <div style={{ fontSize: '12px', color: '#999' }}>Phương Thức Phân Tích</div>
+                  <div style={{ fontSize: '14px', fontWeight: 'bold', marginTop: '4px' }}>
+                    {modalResult.aiEnhanced ? (
+                      <Space>
+                        <Tag color="blue" icon={<RobotOutlined />} size="small">Gemini AI</Tag>
+                        <span style={{ fontSize: '12px', color: '#666' }}>+ Regex Patterns</span>
+                      </Space>
+                    ) : (
+                      <Tag color="default" size="small">Regex Patterns</Tag>
+                    )}
+                  </div>
+                </div>
+              </Col>
+              <Col span={12}>
+                <div style={{ padding: '8px', background: '#fafafa', borderRadius: '4px' }}>
+                  <div style={{ fontSize: '12px', color: '#999' }}>Thời Gian Xử Lý</div>
+                  <div style={{ fontSize: '14px', fontWeight: 'bold', marginTop: '4px', color: '#52c41a' }}>
+                    ~2-3 giây
+                  </div>
+                </div>
+              </Col>
+              <Col span={12}>
+                <div style={{ padding: '8px', background: '#fafafa', borderRadius: '4px' }}>
+                  <div style={{ fontSize: '12px', color: '#999' }}>Patterns Phát Hiện</div>
+                  <div style={{ fontSize: '14px', fontWeight: 'bold', marginTop: '4px' }}>
+                    {modalResult.patternAnalysis?.indicators?.length || 0} chỉ báo
+                  </div>
+                </div>
+              </Col>
+              <Col span={12}>
+                <div style={{ padding: '8px', background: '#fafafa', borderRadius: '4px' }}>
+                  <div style={{ fontSize: '12px', color: '#999' }}>Trạng Thái AI</div>
+                  <div style={{ fontSize: '14px', fontWeight: 'bold', marginTop: '4px' }}>
+                    {modalResult.aiEnhanced ? 
+                      <Tag color="green" size="small">Hoạt Động</Tag> : 
+                      <Tag color="orange" size="small">Dự Phòng</Tag>
+                    }
+                  </div>
+                </div>
+              </Col>
+            </Row>
+          </Card>
+        </div>
+      </Modal>
+    );
+  };
 
   return (
     <div className="page-container check-page">
@@ -484,6 +940,7 @@ const CheckPage = () => {
           </Col>
         </Row>
       </div>
+      {renderResultModal()}
     </div>
   );
 };
