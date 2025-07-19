@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Gemini API configuration
-const GEMINI_API_KEY = 'AIzaSyAaZlYvHtEeqKRq0VTTCkxHRsjoaI1vWKY';
+const GEMINI_API_KEY = "AIzaSyAaZlYvHtEeqKRq0VTTCkxHRsjoaI1vWKY";
 const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 // Create axios instance for Gemini API
