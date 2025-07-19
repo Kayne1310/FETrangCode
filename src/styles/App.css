@@ -975,9 +975,6 @@ html, body {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
-.article-card .ant-card-body {
-  padding: clamp(20px, 4vw, 32px);
-}
 
 /* Enhanced touch targets for lesson cards */
 .article-card .ant-card-actions {
@@ -1001,7 +998,7 @@ html, body {
   justify-content: center;
   gap: 8px;
   padding: 12px 20px;
-  margin: 0 8px;
+ 
   color: #1890ff;
   border: 2px solid #1890ff;
   background: transparent;
@@ -1310,7 +1307,7 @@ html, body {
 
 /* Lesson Page Styles */
 .lesson-page {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
   padding: 20px 0;
 }
@@ -1342,12 +1339,12 @@ html, body {
 }
 
 .lesson-page .ant-steps-item-process .ant-steps-item-icon {
-  background: #f5576c;
-  border-color: #f5576c;
+  background: #667eea;
+  border-color: #667eea;
 }
 
 .lesson-page .ant-steps-item-finish .ant-steps-item-icon {
-  background: #52c41a;
+  background: #52c41a; /* Keep green for success/finish */
   border-color: #52c41a;
 }
 
@@ -1395,8 +1392,8 @@ html, body {
 }
 
 .lesson-page .ant-radio-button-wrapper-checked {
-  border-color: #f5576c;
-  color: #f5576c;
+  border-color: #667eea;
+  color: #667eea;
 }
 
 .lesson-page .ant-tag {
@@ -1420,7 +1417,7 @@ html, body {
 }
 
 .lesson-page .ant-btn-primary {
-  background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: none;
   height: 48px;
   font-size: 16px;
@@ -1431,9 +1428,9 @@ html, body {
 }
 
 .lesson-page .ant-btn-primary:hover {
-  background: linear-gradient(135deg, #e74c3c 0%, #e91e63 100%);
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .lesson-page .ant-btn {
@@ -1477,9 +1474,9 @@ html, body {
 }
 
 .lesson-page .ant-radio-button-wrapper-checked {
-  border-color: #f5576c;
-  color: #f5576c;
-  background: rgba(245, 87, 108, 0.1);
+  border-color: #667eea;
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
 }
 
 /* Mobile responsive buttons */
