@@ -346,7 +346,7 @@ const CheckPage = () => {
   );
 
   return (
-    <div className="check-page">
+    <div className="page-container check-page">
       <div className="container">
         <div className="page-header">
           <Title level={1} className="page-title">
