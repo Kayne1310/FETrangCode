@@ -409,15 +409,15 @@ const BusinessPage = () => {
   );
 
   return (
-    <div className="business-page">
-      <div className="container">
-        <div className="page-header">
+    <div className="business-page" style={{ paddingTop: '100px', minHeight: '100vh' }}>
+      <div className="container" style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px' }}>
+        <div className="page-header" style={{ marginBottom: '32px' }}>
           <Row justify="space-between" align="middle">
             <Col>
-              <Title level={1} className="page-title">
+              <Title level={1} className="page-title" style={{ marginBottom: '8px' }}>
                 <DashboardOutlined /> Dashboard Doanh nghiệp
               </Title>
-              <Paragraph className="page-description">
+              <Paragraph className="page-description" style={{ marginBottom: '0', color: '#666' }}>
                 Giám sát và quản lý an toàn email cho tổ chức của bạn
               </Paragraph>
             </Col>
