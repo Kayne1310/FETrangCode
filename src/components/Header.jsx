@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Layout, Menu, Button, Space, Drawer } from 'antd';
 import { 
@@ -9,13 +9,14 @@ import {
   BookOutlined,
   DashboardOutlined,
   SearchOutlined,
+  RobotOutlined,
   MenuOutlined,
   CloseOutlined
 } from '@ant-design/icons';
 
 const { Header: AntHeader } = Layout;
 
-const Header = () => {
+const Header = ({ contentRef }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -43,7 +44,7 @@ const Header = () => {
     },  
     {
       key: '/AIcheck',
-      icon: <BookOutlined />,
+      icon: <RobotOutlined />,
       label: 'AI Check',  
     },
     {
@@ -67,6 +68,23 @@ const Header = () => {
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
+
+  useEffect(() => {
+    console.log('Location changed:', location.pathname);
+    if (contentRef && contentRef.current) {
+      console.log('Scrolling Ant Design Content to 0,0');
+      contentRef.current.scrollTo(0, 0);
+    } else {
+      const pageContainer = document.querySelector('.page-container');
+      if (pageContainer) {
+        console.log('Scrolling .page-container to 0,0');
+        pageContainer.scrollTo(0, 0);
+      } else {
+        console.log('Scrolling window to 0,0');
+        window.scrollTo(0, 0);
+      }
+    }
+  }, [location.pathname, contentRef]);
 
   return (
     <AntHeader className="header">

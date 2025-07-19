@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Row, Col, Card, Typography, Input, Button, Select, Tag, Space, 
   List, Avatar, Divider, Breadcrumb, Pagination, Affix, Anchor
@@ -301,11 +301,25 @@ const BlogPage = () => {
 
   const handleReadMore = (post) => {
     setSelectedPost(post);
+    // Scroll to top khi mở blog post detail
+    window.scrollTo({ 
+      top: 0, 
+      behavior: 'smooth' 
+    });
   };
 
   const handleBackToList = () => {
     setSelectedPost(null);
+    // Scroll to top khi quay lại danh sách
+    window.scrollTo({ 
+      top: 0, 
+      behavior: 'smooth' 
+    });
   };
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [selectedPost]);
 
   if (selectedPost) {
     return (
@@ -400,16 +414,9 @@ const BlogPage = () => {
             </Col>
 
             <Col xs={24} lg={6}>
-              <Affix offsetTop={24}>
+              <div style={{ position: 'sticky', top: '50px' }}>
                 <Space direction="vertical" size="large" style={{ width: '100%' }}>
-                  <Card size="small" title="Mục lục" bordered={false}>
-                    <Anchor>
-                      <Link href="#section1" title="Giới thiệu" />
-                      <Link href="#section2" title="Nội dung chính" />
-                      <Link href="#section3" title="Hướng dẫn" />
-                      <Link href="#section4" title="Kết luận" />
-                    </Anchor>
-                  </Card>
+               
 
                   <Button 
                     type="primary" 
@@ -447,7 +454,7 @@ const BlogPage = () => {
                     />
                   </Card>
                 </Space>
-              </Affix>
+              </div>
             </Col>
           </Row>
         </div>
@@ -721,7 +728,7 @@ const BlogPage = () => {
 
           {/* Sidebar */}
           <Col xs={24} lg={6}>
-            <Affix offsetTop={24}>
+            <div style={{ position: 'sticky', top: '100px' }}>
               <Space direction="vertical" size="large" style={{ width: '100%' }}>
                 {/* Categories */}
                 <Card title="Chuyên mục" size="small" bordered={false}>
@@ -798,9 +805,9 @@ const BlogPage = () => {
                     ))}
                   </Space>
                 </Card>
-              </Space>
-            </Affix>
-          </Col>
+                </Space>
+              </div>
+           </Col>
         </Row>
       </div>
     </div>
