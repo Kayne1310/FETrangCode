@@ -1,4 +1,4 @@
-# 🛡️ SafeMail Guard - Hệ thống Phòng chống Lừa đảo Email
+# 🛡️ Watcher Guard - Hệ thống Phòng chống Lừa đảo Email
 
 [![React](https://img.shields.io/badge/React-18-blue.svg)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-5-purple.svg)](https://vitejs.dev/)
@@ -7,7 +7,7 @@
 
 ## 🚀 Giới thiệu
 
-**SafeMail Guard** là hệ thống AI tiên tiến giúp phát hiện và phòng chống các mối đe dọa email như phishing, spam và lừa đảo trực tuyến. Được xây dựng với React + Vite + Ant Design, hệ thống cung cấp giao diện hiện đại và trải nghiệm người dùng tuyệt vời.
+**Watcher Guard** là hệ thống AI tiên tiến giúp phát hiện và phòng chống các mối đe dọa email như phishing, spam và lừa đảo trực tuyến. Được xây dựng với React + Vite + Ant Design, hệ thống cung cấp giao diện hiện đại và trải nghiệm người dùng tuyệt vời.
 
 ### ✨ Tính năng chính
 
@@ -134,7 +134,7 @@ VITE_API_BASE_URL=https://api.safemailguard.com
 VITE_API_TIMEOUT=30000
 
 # App Configuration
-VITE_APP_NAME=SafeMail Guard
+VITE_APP_NAME=Watcher Guard
 VITE_APP_VERSION=1.0.0
 
 # Features
@@ -275,7 +275,7 @@ Dự án được phân phối dưới MIT License. Xem file `LICENSE` để bi�
 
 <div align="center">
 
-**🛡️ SafeMail Guard - Bảo vệ bạn khỏi lừa đảo email với AI**
+**🛡️ Watcher Guard - Bảo vệ bạn khỏi lừa đảo email với AI**
 
 Made with ❤️ by [Trang Code](https://github.com/trangcode)
 
