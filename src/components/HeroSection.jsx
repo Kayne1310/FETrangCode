@@ -10,6 +10,26 @@ import {
 const { Title, Paragraph } = Typography;
 
 const HeroSection = () => {
+  const scrollToCheckSection = () => {
+    const checkSection = document.querySelector('.check-section');
+    if (checkSection) {
+      checkSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
+
+  const scrollToEducationSection = () => {
+    const educationSection = document.querySelector('.education-section');
+    if (educationSection) {
+      educationSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
+
   return (
     <div className="hero-section">
       <div className="hero-background">
@@ -52,6 +72,7 @@ const HeroSection = () => {
                       size="large" 
                       icon={<RightCircleOutlined />}
                       className="cta-button"
+                      onClick={scrollToCheckSection}
                     >
                       Kiểm tra ngay
                     </Button>
@@ -59,6 +80,7 @@ const HeroSection = () => {
                       size="large" 
                       ghost
                       className="secondary-button"
+                      onClick={scrollToEducationSection}
                     >
                       Tìm hiểu thêm
                     </Button>

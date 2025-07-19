@@ -1,177 +1,185 @@
 import React, { useState } from 'react';
 import { 
-  Row, Col, Card, Typography, Input, Button, Select, 
-  Alert, Spin, Result, Progress, Tag, Space, Divider 
+  Row, Col, Card, Typography, Input, Button, 
+  Alert, Spin, Result, Progress, Tag, Space, Divider, Modal 
 } from 'antd';
 import { 
   SearchOutlined,
   MailOutlined,
-  LinkOutlined,
-  PhoneOutlined,
   FileTextOutlined,
   SafetyOutlined,
   ExclamationCircleOutlined,
   CloseCircleOutlined,
-  CheckCircleOutlined
+  CheckCircleOutlined,
+  WarningOutlined
 } from '@ant-design/icons';
-import { checkEmailSafety } from '../services/emailService';
+import { predictEmailCategory } from '../services/mlService';
 
 const { Title, Paragraph } = Typography;
 const { TextArea } = Input;
-const { Option } = Select;
 
 const CheckSection = () => {
-  const [checkType, setCheckType] = useState('email');
-  const [inputValue, setInputValue] = useState('');
+  const [emailData, setEmailData] = useState({
+    title: '',
+    content: '',
+    sender: ''
+  });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
-  const checkTypes = [
-    { value: 'email', label: 'Email Address', icon: <MailOutlined /> },
-    { value: 'link', label: 'Website Link', icon: <LinkOutlined /> },
-    { value: 'phone', label: 'Số điện thoại', icon: <PhoneOutlined /> },
-    { value: 'content', label: 'Nội dung Email', icon: <FileTextOutlined /> }
-  ];
+  const handleInputChange = (field, value) => {
+    setEmailData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   const handleCheck = async () => {
-    if (!inputValue.trim()) return;
+    if (!emailData.title.trim() || !emailData.content.trim() || !emailData.sender.trim()) {
+      return;
+    }
     
     setLoading(true);
     try {
-      const response = await checkEmailSafety({
-        type: checkType,
-        value: inputValue
-      });
+      const response = await predictEmailCategory(emailData);
       setResult(response);
+      setModalVisible(true);
     } catch (error) {
       console.error('Error checking:', error);
       setResult({
-        status: 'error',
-        message: 'Có lỗi xảy ra khi kiểm tra. Vui lòng thử lại.'
+        success: false,
+        message: error.message || 'Có lỗi xảy ra khi kiểm tra. Vui lòng thử lại.'
       });
+      setModalVisible(true);
     } finally {
       setLoading(false);
     }
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'safe': return '#52c41a';
-      case 'suspicious': return '#faad14';
-      case 'spam': return '#fa8c16';
-      case 'phishing': return '#f5222d';
+  const getCategoryColor = (category) => {
+    switch (category) {
+      case 'An toàn': return '#52c41a';
+      case 'Nghi ngờ': return '#faad14';
+      case 'Spam': return '#fa8c16';
+      case 'Giả mạo': return '#f5222d';
       default: return '#d9d9d9';
     }
   };
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'safe': return <CheckCircleOutlined style={{ color: '#52c41a' }} />;
-      case 'suspicious': return <ExclamationCircleOutlined style={{ color: '#faad14' }} />;
-      case 'spam': return <CloseCircleOutlined style={{ color: '#fa8c16' }} />;
-      case 'phishing': return <CloseCircleOutlined style={{ color: '#f5222d' }} />;
+  const getCategoryIcon = (category) => {
+    switch (category) {
+      case 'An toàn': return <CheckCircleOutlined style={{ color: '#52c41a' }} />;
+      case 'Nghi ngờ': return <ExclamationCircleOutlined style={{ color: '#faad14' }} />;
+      case 'Spam': return <WarningOutlined style={{ color: '#fa8c16' }} />;
+      case 'Giả mạo': return <CloseCircleOutlined style={{ color: '#f5222d' }} />;
       default: return <ExclamationCircleOutlined />;
     }
   };
 
-  const getStatusText = (status) => {
-    switch (status) {
-      case 'safe': return 'An toàn';
-      case 'suspicious': return 'Nghi ngờ';
-      case 'spam': return 'Thư rác (Spam)';
-      case 'phishing': return 'Lừa đảo (Phishing)';
-      default: return 'Không xác định';
+  const getCategoryDescription = (category) => {
+    switch (category) {
+      case 'An toàn': return 'Email này được đánh giá là an toàn và đáng tin cậy.';
+      case 'Nghi ngờ': return 'Email này có một số dấu hiệu đáng ngờ, cần thận trọng.';
+      case 'Spam': return 'Email này có đặc điểm của thư rác, không nên mở.';
+      case 'Giả mạo': return 'Email này có dấu hiệu giả mạo, có thể là phishing.';
+      default: return 'Không thể xác định loại email.';
     }
   };
 
-  const renderResult = () => {
+  const renderModalContent = () => {
     if (!result) return null;
 
-    if (result.status === 'error') {
+    if (!result.success) {
       return (
         <Alert
-          message="Lỗi kiểm tra"
+          message="Lỗi phân tích"
           description={result.message}
           type="error"
           showIcon
-          className="check-result"
         />
       );
     }
 
+    const confidencePercent = Math.round(result.confidence * 100);
+    const sortedProbabilities = Object.entries(result.probabilities)
+      .sort(([,a], [,b]) => b - a);
+
     return (
-      <Card className="result-card" bordered={false}>
+      <div className="prediction-result">
         <Result
-          icon={getStatusIcon(result.classification)}
-          title={getStatusText(result.classification)}
-          subTitle={result.description}
+          icon={getCategoryIcon(result.category)}
+          title={result.category}
+          subTitle={getCategoryDescription(result.category)}
           extra={[
             <Space key="details" direction="vertical" style={{ width: '100%' }}>
-              <div className="risk-score">
-                <Title level={5}>Điểm rủi ro</Title>
+              <div className="confidence-score">
+                <Title level={5}>Độ tin cậy</Title>
                 <Progress
-                  percent={result.riskScore}
-                  strokeColor={getStatusColor(result.classification)}
+                  percent={confidencePercent}
+                  strokeColor={getCategoryColor(result.category)}
                   size="small"
                 />
-                <span className="score-text">{result.riskScore}/100</span>
+                <span className="score-text">{confidencePercent}%</span>
               </div>
               
               <Divider />
               
-              <div className="threat-indicators">
-                <Title level={5}>Các chỉ số nguy hiểm</Title>
-                <Space wrap>
-                  {result.threats?.map((threat, index) => (
-                    <Tag 
-                      key={index} 
-                      color={threat.severity === 'high' ? 'red' : 'orange'}
-                    >
-                      {threat.name}
-                    </Tag>
+              <div className="all-probabilities">
+                <Title level={5}>Xác suất các loại</Title>
+                <Space direction="vertical" style={{ width: '100%' }}>
+                  {sortedProbabilities.map(([category, probability]) => (
+                    <div key={category} className="probability-item">
+                      <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+                        <span>{category}</span>
+                        <span style={{ fontWeight: 'bold' }}>
+                          {Math.round(probability * 100)}%
+                        </span>
+                      </Space>
+                      <Progress
+                        percent={Math.round(probability * 100)}
+                        strokeColor={getCategoryColor(category)}
+                        size="small"
+                        showInfo={false}
+                      />
+                    </div>
                   ))}
                 </Space>
               </div>
               
-              {result.recommendations && (
-                <>
-                  <Divider />
-                  <div className="recommendations">
-                    <Title level={5}>Khuyến nghị</Title>
-                    <ul>
-                      {result.recommendations.map((rec, index) => (
-                        <li key={index}>{rec}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </>
-              )}
+              <Divider />
+              
+                             <div className="analysis-info">
+                 <Space direction="vertical" size="small">
+                   <div>
+                     <strong>Phương pháp:</strong> Mô hình học máy phân loại dựa trên dữ liệu
+                   </div>
+                   <div>
+                     <strong>Thời gian xử lý:</strong> {result.processing_time}ms
+                   </div>
+                   <div>
+                     <strong>Độ dài văn bản:</strong> {result.text_length} ký tự
+                   </div>
+                 </Space>
+               </div>
             </Space>
           ]}
         />
-      </Card>
+      </div>
     );
   };
 
-  const getPlaceholder = () => {
-    switch (checkType) {
-      case 'email': return 'Nhập địa chỉ email cần kiểm tra...';
-      case 'link': return 'Nhập URL/link cần kiểm tra...';
-      case 'phone': return 'Nhập số điện thoại cần kiểm tra...';
-      case 'content': return 'Nhập nội dung email cần phân tích...';
-      default: return 'Nhập thông tin cần kiểm tra...';
-    }
-  };
+  const isFormValid = emailData.title.trim() && emailData.content.trim() && emailData.sender.trim();
 
   return (
     <div className="check-section">
       <div className="container">
         <div className="section-header">
           <Title level={2} className="section-title">
-            Kiểm tra Độ An toàn
+            Kiểm tra Độ An toàn Email
           </Title>
           <Paragraph className="section-description">
-            Sử dụng AI để phân tích và đánh giá mức độ rủi ro của email, link, số điện thoại
+            Sử dụng AI để phân tích và đánh giá mức độ rủi ro của email dựa trên tiêu đề, nội dung và người gửi
           </Paragraph>
         </div>
 
@@ -179,43 +187,41 @@ const CheckSection = () => {
           <Col xs={24} lg={16} xl={12}>
             <Card className="check-card" bordered={false}>
               <Space direction="vertical" size="large" style={{ width: '100%' }}>
-                <div className="check-type-selector">
-                  <Title level={4}>Chọn loại kiểm tra</Title>
-                  <Select
-                    value={checkType}
-                    onChange={setCheckType}
-                    style={{ width: '100%' }}
-                    size="large"
-                  >
-                    {checkTypes.map(type => (
-                      <Option key={type.value} value={type.value}>
-                        <Space>
-                          {type.icon}
-                          {type.label}
-                        </Space>
-                      </Option>
-                    ))}
-                  </Select>
-                </div>
+                <div className="email-form">
+                  <Title level={4}>
+                    <MailOutlined /> Thông tin Email
+                  </Title>
+                  
+                  <div className="form-field">
+                    <Title level={5}>Tiêu đề Email</Title>
+                    <Input
+                      value={emailData.title}
+                      onChange={(e) => handleInputChange('title', e.target.value)}
+                      placeholder="Nhập tiêu đề email..."
+                      size="large"
+                    />
+                  </div>
 
-                <div className="input-section">
-                  {checkType === 'content' ? (
+                  <div className="form-field">
+                    <Title level={5}>Người gửi</Title>
+                    <Input
+                      value={emailData.sender}
+                      onChange={(e) => handleInputChange('sender', e.target.value)}
+                      placeholder="Nhập địa chỉ email người gửi..."
+                      size="large"
+                    />
+                  </div>
+
+                  <div className="form-field">
+                    <Title level={5}>Nội dung Email</Title>
                     <TextArea
-                      value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
-                      placeholder={getPlaceholder()}
+                      value={emailData.content}
+                      onChange={(e) => handleInputChange('content', e.target.value)}
+                      placeholder="Nhập nội dung email cần phân tích..."
                       rows={6}
                       size="large"
                     />
-                  ) : (
-                    <Input
-                      value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
-                      placeholder={getPlaceholder()}
-                      size="large"
-                      onPressEnter={handleCheck}
-                    />
-                  )}
+                  </div>
                 </div>
 
                 <Button
@@ -224,10 +230,10 @@ const CheckSection = () => {
                   icon={<SearchOutlined />}
                   onClick={handleCheck}
                   loading={loading}
-                  disabled={!inputValue.trim()}
+                  disabled={!isFormValid}
                   block
                 >
-                  {loading ? 'Đang phân tích...' : 'Kiểm tra ngay'}
+                  {loading ? 'Đang phân tích...' : 'Kiểm tra Email'}
                 </Button>
               </Space>
             </Card>
@@ -239,19 +245,26 @@ const CheckSection = () => {
             <Spin size="large">
               <div className="loading-content">
                 <SafetyOutlined style={{ fontSize: 48, color: '#1890ff' }} />
-                <p>Đang phân tích với AI...</p>
+                <p>Đang phân tích email với AI...</p>
               </div>
             </Spin>
           </Row>
         )}
 
-        {result && !loading && (
-          <Row justify="center" style={{ marginTop: 24 }}>
-            <Col xs={24} lg={16}>
-              {renderResult()}
-            </Col>
-          </Row>
-        )}
+        <Modal
+          title="Kết quả phân tích Email"
+          open={modalVisible}
+          onCancel={() => setModalVisible(false)}
+          footer={[
+            <Button key="close" onClick={() => setModalVisible(false)}>
+              Đóng
+            </Button>
+          ]}
+          width={600}
+          centered
+        >
+          {renderModalContent()}
+        </Modal>
       </div>
     </div>
   );
