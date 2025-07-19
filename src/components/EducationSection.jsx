@@ -11,6 +11,7 @@ import {
   CheckCircleOutlined
 } from '@ant-design/icons';
 import { getEducationContent } from '../services/emailService';
+import { useNavigate } from 'react-router-dom';
 
 const { Title, Paragraph } = Typography;
 const { Panel } = Collapse;
@@ -18,6 +19,7 @@ const { Panel } = Collapse;
 const EducationSection = () => {
   const [content, setContent] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchEducationContent = async () => {
@@ -175,7 +177,7 @@ const EducationSection = () => {
                           2: '/lesson/security', 
                           3: '/lesson/spam'
                         };
-                        window.location.href = lessonRoutes[article.id];
+                        navigate(lessonRoutes[article.id]);
                       }}
                     >
                       Đọc thêm
